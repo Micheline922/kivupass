@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <!-- 
+        PROJET : KIVUPASS - SYSTÈME DE RÉSERVATION LACUSTRE
+        VERSION : 3.5 HIGH-FIDELITY (SaaS ARCHITECTURE)
+        CIBLE : BUKAVU - GOMA - RÉPUBLIQUE DÉMOCRATIQUE DU CONGO
+        MODULE : INDEX PUBLIC AVEC CONTACTS ARMATEURS
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1677ff">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logokp.png">
+    <link rel="apple-touch-icon" href="logokp.png">
+    <title>KivuPass | Réservation Lac Kivu - Système Haute Fidélité</title>
+
+    <!-- IMPORTATION DES RESSOURCES EXTERNES -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 
+           =========================================
+           1. VARIABLES ET THÈME GLOBAL
+           =========================================
+        */
+        :root {
+            --dark-bg: #07152f;
+            --card-bg: #101f3b;
+            --accent: #1677ff;
+            --accent-hover: #00d9e8;
+            --gold: #35e548;
+            --text-white: #ffffff;
+            --text-gray: #94a3b8;
+            --error-red: #ff4d4d;
+            --success-green: #35e548;
+            --border-color: #263d64;
+            --glass-effect: rgba(255, 255, 255, 0.03);
+            --transition-speed: 0.4s;
+            /* Couleurs des réseaux mobiles */
+            --orange-color: #ff6600;
+            --airtel-color: #ff0000;
+            --vodacom-color: #e60000;
+            --africell-color: #4b0082;
+        }
+
+        /* RÉINITIALISATION ET BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-white);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 
+           =========================================
+           2. NAVIGATION ET HEADER
+           =========================================
+        */
+        .navbar {
+            background: rgba(10, 14, 20, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-white);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .btn-armateur-link {
+            background-color: var(--accent);
+            color: var(--text-white) !important;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.2);
+        }
+
+        /* 
+           =========================================
+           3. HERO SECTION ET RECHERCHE
+           =========================================
+        */
+        .hero {
+            height: 45vh;
+            background: linear-gradient(rgba(0,0,0,0.8), var(--dark-bg)), 
+                        url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1400') center/cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .hero p {
+            color: var(--text-gray);
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+
+        .search-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: -40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            padding: 15px 35px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0, 168, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            transform: scale(1.02);
+            box-shadow: 0 15px 50px rgba(0, 168, 255, 0.4);
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--text-white);
+            width: 100%;
+            outline: none;
+            font-size: 18px;
+            margin-left: 15px;
+        }
+
+        .search-box i {
+            color: var(--accent);
+            font-size: 20px;
+        }
+
+        /* 
+           =========================================
+           4. GRID SYSTEM ET CARDS
+           =========================================
+        */
+        .container {
+            padding: 70px 8%;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        /* CARTE COMPAGNIE */
+        .comp-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 45px 30px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comp-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-12px);
+            background: #1c2128;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.5);
+        }
+
+        .comp-card i.main-icon {
+            font-size: 65px;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .company-logo {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            background: #0d1117;
+        }
+
+        .comp-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: var(--text-white);
+        }
+
+        .comp-card .fleet-count {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        /* STYLE POUR LES NUMÉROS COPIABLES */
+        .comp-contacts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .contact-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.3s;
+            color: var(--text-gray);
+            cursor: copy;
+            border: 1px solid transparent;
+        }
+
+        .contact-badge:hover {
+            background: rgba(0, 168, 255, 0.1);
+            border-color: var(--accent);
+            color: var(--text-white);
+        }
+
+        .contact-badge i {
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .network-name {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+
+        /* CARTE BATEAU */
+        .boat-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
+            animation: cardEntrance 0.6s ease-out;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .boat-img {
+            height: 180px;
+            background: linear-gradient(45deg, #1e293b, #0f172a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .boat-info {
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        .boat-info h3 {
+            font-size: 22px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .level-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .level-tag {
+            background: rgba(0, 168, 255, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .price {
+            font-weight: 700;
+            color: var(--text-white);
+            font-size: 16px;
+        }
+
+        .seats-count {
+            font-size: 13px;
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .seats-critical {
+            color: var(--error-red) !important;
+            font-weight: 700;
+        }
+
+        .btn-reserve {
+            background: var(--accent);
+            color: var(--text-white);
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .btn-reserve:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        .btn-reserve:disabled {
+            background: #475569;
+            color: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-white);
+            padding: 12px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-bottom: 35px;
+            font-weight: 500;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* 
+           =========================================
+           5. MODAL DE RÉSERVATION (FORMULAIRE)
+           =========================================
+        */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.96);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            max-width: 650px;
+            margin: auto;
+            padding: 45px;
+            border-radius: 30px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 100px rgba(0, 168, 255, 0.15);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-white);
+            outline: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            background: #101f3b;
+            box-shadow: 0 0 10px rgba(0, 168, 255, 0.1);
+        }
+
+        /* SYSTÈME DE CONTACT MULTI-CANAL */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .docs-section {
+            background: rgba(0,0,0,0.2);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 25px 0;
+            border: 1px dashed var(--border-color);
+        }
+
+        .docs-section h4 {
+            font-size: 14px;
+            color: var(--gold);
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .doc-item {
+            margin-bottom: 18px;
+        }
+
+        .doc-item label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-gray);
+        }
+
+        .payment-proof-zone {
+            background: rgba(0, 168, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 168, 255, 0.2);
+            margin-top: 10px;
+        }
+
+        /* 
+           =========================================
+           6. CLASSES UTILITAIRES
+           =========================================
+        */
+        .hidden {
+            display: none !important;
+        }
+
+        .no-results {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .no-results i {
+            font-size: 50px;
+            color: var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        /* Notification de copie */
+        #copyToast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--accent);
+            color: white;
+            text-align: center;
+            border-radius: 30px;
+            padding: 12px;
+            position: fixed;
+            z-index: 3000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #copyToast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <!-- ENTÊTE HERO -->
+    <header class="hero">
+        <h1 id="heroTitle">Choisissez votre Compagnie</h1>
+        <p>Garantissez votre voyage sur le Lac Kivu. Système sécurisé avec validation par les armateurs en temps réel.</p>
+    </header>
+
+    <!-- BARRE DE RECHERCHE -->
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchBar" placeholder="Recherche instantanée (ex: Emmanuel, Silimu...)" oninput="handleInstantSearch()">
+        </div>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="container">
+        <!-- Contrôle de navigation -->
+        <button id="backBtn" class="back-btn hidden" onclick="returnToCompanyView()">
+            <i class="fas fa-arrow-left"></i> Retour aux compagnies
+        </button>
+
+        <!-- Grille d'affichage dynamique -->
+        <div id="mainGrid" class="grid">
+            <!-- Injecté dynamiquement par le script -->
+        </div>
+    </main>
+
+    <!-- MODAL DE RÉSERVATION AVANCÉE -->
+    <div id="resModal" class="modal">
+        <div class="modal-content">
+            <h2 id="resTitle" style="color: var(--gold);">Réservation</h2>
+            <p id="resInfo" style="color: var(--accent); margin-bottom: 30px; font-weight: 500; font-size: 15px;"></p>
+            
+            <form id="bookingForm">
+                <!-- Informations Identité -->
+                <div class="form-group">
+                    <label>Nom Complet du Passager (tel que sur la pièce d'identité)</label>
+                    <input type="text" id="userName" class="form-input" placeholder="Ex: Jean Dupont" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Adresse Email Professionnelle ou Personnelle</label>
+                    <input type="email" id="userEmail" class="form-input" placeholder="nom@exemple.com" required>
+                </div>
+
+                <!-- Informations Contact -->
+                <div class="contact-grid">
+                    <div class="form-group">
+                        <label><i class="fab fa-whatsapp"></i> Numéro WhatsApp</label>
+                        <input type="tel" id="userWhatsapp" class="form-input" placeholder="Ex: 243..." required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Numéro Appel/SMS</label>
+                        <input type="tel" id="userPhone" class="form-input" placeholder="Ex: 243..." required>
+                    </div>
+                </div>
+                
+                <!-- Sélection de la classe -->
+                <div class="form-group">
+                    <label>Niveau de confort / Classe souhaitée</label>
+                    <select id="userLevel" class="form-input" required></select>
+                </div>
+
+                <!-- ZONE DYNAMIQUE POUR LES DOCUMENTS COMPAGNIE -->
+                <div id="docsSection" class="docs-section">
+                    <h4><i class="fas fa-shield-alt"></i> Conformité & Documents</h4>
+                    <div id="docsArea">
+                        <!-- Liste des fichiers requis -->
+                    </div>
+                </div>
+
+                <!-- Preuve de Paiement -->
+                <div class="payment-proof-zone">
+                    <label style="display: block; font-size: 13px; margin-bottom: 10px;">
+                        <i class="fas fa-receipt"></i> Capture du paiement Mobile Money (Obligatoire)
+                    </label>
+                    <input type="file" id="payImg" required style="font-size: 12px; color: var(--text-gray);">
+                </div>
+
+                <!-- Actions du formulaire -->
+                <div style="margin-top: 35px;">
+                    <button type="submit" id="submitRes" class="btn-reserve">
+                        SOUMETTRE MON DOSSIER DE RÉSERVATION
+                    </button>
+                    <button type="button" onclick="closeModalWindow()" style="background:none; border:none; color:#777; width:100%; margin-top:15px; cursor:pointer; font-size: 13px; text-decoration: underline;">
+                        Annuler la procédure de réservation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast pour la copie -->
+    <div id="copyToast">Numéro copié avec succès !</div>
+
+    <!-- 
+       =========================================
+       7. LOGIQUE JAVASCRIPT (KIVU ENGINE)
+       =========================================
+    -->
+    <script src="common.js"></script>
+    <script>
+        /**
+         * ÉTAT GLOBAL DE L'APPLICATION
+         */
+        let allCompaniesData = [];
+        let activeComp = null;
+        let activeBoat = null;
+
+        async function apiRequest(url, options = {}) {
+            const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Erreur de communication avec le serveur.');
+            return data;
+        }
+
+        async function loadCompanies() {
+            allCompaniesData = await apiRequest('api.php?action=companies');
+            renderCompanyGallery();
+        }
+
+        /**
+         * FONCTION 1 : RENDU DE LA LISTE DES COMPAGNIES
+         * Mise à jour : Ajout des numéros de contact copiables
+         */
+        function renderCompanyGallery(datasource = null) {
+            const dataToDisplay = datasource || allCompaniesData.filter(c => c.approved);
+            const gridContainer = document.getElementById('mainGrid');
+            const navigationButton = document.getElementById('backBtn');
+            const titleElement = document.getElementById('heroTitle');
+
+            gridContainer.innerHTML = '';
+            navigationButton.classList.add('hidden');
+            titleElement.innerText = "Choisissez votre Compagnie";
+
+            if (dataToDisplay.length === 0) {
+                gridContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p style="color: var(--text-gray);">Aucun résultat ne correspond à votre recherche actuelle.</p>
+                    </div>`;
+                return;
+            }
+
+            dataToDisplay.forEach(company => {
+                const compCard = document.createElement('div');
+                compCard.className = 'comp-card';
+                compCard.onclick = () => showBoatListForCompany(company);
+                
+                // Préparation de la section contact/paiement
+                let contactsHtml = '';
+                if (company.payments) {
+                    contactsHtml = '<div class="comp-contacts">';
+                    
+                    if (company.payments.orange) {
+                        contactsHtml += `<div class="contact-badge" title="Cliquer pour copier" onclick="event.stopPropagation(); copyToClipboard('${company.payments.orange}', 'Orange Money')">
+                            <span><i class="fas fa-mobile-alt" style="color:var(--orange-color)"></i> <span class="network-name">Orange:</span> ${company.payments.orange}</span>
+                            <i class="far fa-copy"></i>
+                        </div>`;
+                    }
+                    if (company.payments.airtel) {
+                        contactsHtml += `<div class="contact-badge" title="Cliquer pour copier" onclick="event.stopPropagation(); copyToClipboard('${company.payments.airtel}', 'Airtel Money')">
+                            <span><i class="fas fa-mobile-alt" style="color:var(--airtel-color)"></i> <span class="network-name">Airtel:</span> ${company.payments.airtel}</span>
+                            <i class="far fa-copy"></i>
+                        </div>`;
+                    }
+                    if (company.payments.vodacom) {
+                        contactsHtml += `<div class="contact-badge" title="Cliquer pour copier" onclick="event.stopPropagation(); copyToClipboard('${company.payments.vodacom}', 'M-Pesa')">
+                            <span><i class="fas fa-mobile-alt" style="color:var(--vodacom-color)"></i> <span class="network-name">M-Pesa:</span> ${company.payments.vodacom}</span>
+                            <i class="far fa-copy"></i>
+                        </div>`;
+                    }
+                    if (company.payments.africell) {
+                        contactsHtml += `<div class="contact-badge" title="Cliquer pour copier" onclick="event.stopPropagation(); copyToClipboard('${company.payments.africell}', 'Africell')">
+                            <span><i class="fas fa-mobile-alt" style="color:var(--africell-color)"></i> <span class="network-name">Africell:</span> ${company.payments.africell}</span>
+                            <i class="far fa-copy"></i>
+                        </div>`;
+                    }
+                    
+                    contactsHtml += '</div>';
+                }
+
+                compCard.innerHTML = `
+                    ${company.logo ? `<img src="${company.logo}" class="company-logo" alt="Logo ${company.companyName}">` : '<div class="company-logo"><i class="fas fa-image main-icon"></i></div>'}
+                    <h3>${company.companyName}</h3>
+                    <div class="fleet-count">${company.fleet.length} Navires en opération</div>
+                    ${contactsHtml}
+                `;
+                gridContainer.appendChild(compCard);
+            });
+        }
+
+        /**
+         * FONCTION : COPIE DANS LE PRESSE-PAPIER
+         */
+        function copyToClipboard(number, network) {
+            navigator.clipboard.writeText(number).then(() => {
+                const toast = document.getElementById("copyToast");
+                toast.innerText = "Numéro " + network + " copié !";
+                toast.className = "show";
+                setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+            });
+        }
+
+        /**
+         * FONCTION 2 : AFFICHAGE DE LA FLOTTE D'UN ARMATEUR
+         */
+        function showBoatListForCompany(companyObject) {
+            activeComp = companyObject;
+            const gridContainer = document.getElementById('mainGrid');
+            const navigationButton = document.getElementById('backBtn');
+            const titleElement = document.getElementById('heroTitle');
+
+            gridContainer.innerHTML = '';
+            navigationButton.classList.remove('hidden');
+            titleElement.innerText = "Bateaux disponibles chez " + companyObject.companyName;
+
+            companyObject.fleet.forEach((boat, index) => {
+                const boatCard = document.createElement('div');
+                boatCard.className = 'boat-card';
+                const hasAvailableLevel = boat.levels.some(level => parseInt(level.seats, 10) > 0);
+                
+                let pricingTableHtml = boat.levels.map(level => {
+                    const isCritical = parseInt(level.seats) < 5;
+                    return `
+                        <div class="level-row">
+                            <span class="level-tag">${level.label}</span>
+                            <span class="price">${level.price} $</span>
+                            <span class="seats-count ${isCritical ? 'seats-critical' : ''}">
+                                ${level.seats > 0 ? level.seats + ' places restantes' : 'BATEAU COMPLET'}
+                            </span>
+                        </div>`;
+                }).join('');
+
+                boatCard.innerHTML = `
+                    <div class="boat-img">
+                        <i class="fas fa-ship" style="font-size:55px; color:rgba(255,255,255,0.1)"></i>
+                    </div>
+                    <div class="boat-info">
+                        <h3>${boat.name}</h3>
+                        <div class="levels-container">${pricingTableHtml}</div>
+                        <button class="btn-reserve" onclick="triggerBookingProcess(${index})" ${hasAvailableLevel ? '' : 'disabled'}>
+                            ${hasAvailableLevel ? 'Réserver sur ce navire' : 'Navire complet'}
+                        </button>
+                    </div>`;
+                gridContainer.appendChild(boatCard);
+            });
+        }
+
+        /**
+         * FONCTION 3 : SYSTÈME DE RECHERCHE INSTANTANÉE (DÈS LA 1ÈRE LETTRE)
+         */
+        function handleInstantSearch() {
+            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            
+            if (searchTerm.length === 0) {
+                renderCompanyGallery();
+                return;
+            }
+
+            const searchResults = allCompaniesData.filter(comp => {
+                const nameMatch = comp.companyName.toLowerCase().includes(searchTerm);
+                const boatMatch = comp.fleet.some(b => b.name.toLowerCase().includes(searchTerm));
+                return comp.approved && (nameMatch || boatMatch);
+            });
+
+            renderCompanyGallery(searchResults);
+        }
+
+        /**
+         * FONCTION 4 : OUVERTURE DU MODAL ET PRÉPARATION DES DONNÉES
+         */
+        async function triggerBookingProcess(boatIndex) {
+            try {
+                const latestCompanies = await apiRequest('api.php?action=companies');
+                const latestCompany = latestCompanies.find(company => company.id === activeComp.id);
+                if (latestCompany) {
+                    activeComp = latestCompany;
+                    renderCompanyGallery([latestCompany]);
+                    showBoatListForCompany(latestCompany);
+                }
+            } catch (error) {
+                alert('Impossible d’actualiser les places disponibles. Réessayez.');
+                return;
+            }
+
+            activeBoat = activeComp.fleet[boatIndex];
+            if (!activeBoat) {
+                alert('Ce navire n’est plus disponible. Actualisez la page.');
+                return;
+            }
+            const modalWindow = document.getElementById('resModal');
+            const summaryText = document.getElementById('resInfo');
+            const dropdownSelect = document.getElementById('userLevel');
+            const documentsGrid = document.getElementById('docsArea');
+
+            summaryText.innerText = `Armateur : ${activeComp.companyName} | Navire : ${activeBoat.name}`;
+            
+            // Construction des options de classes
+            const availableLevels = activeBoat.levels.filter(level => parseInt(level.seats, 10) > 0);
+            if (!availableLevels.length) {
+                alert('Ce navire est complet pour toutes les classes disponibles.');
+                return;
+            }
+            dropdownSelect.innerHTML = activeBoat.levels.map((level, idx) => {
+                const isFull = parseInt(level.seats) <= 0;
+                return `
+                    <option value="${idx}" ${isFull ? 'disabled' : ''}>
+                        ${level.label} - Tarif : ${level.price}$ (${isFull ? 'COMPLET' : level.seats + ' places'})
+                    </option>`;
+            }).join('');
+
+            // Construction dynamique des champs de documents
+            documentsGrid.innerHTML = '';
+            if (activeComp.requiredDocs && activeComp.requiredDocs.length > 0) {
+                document.getElementById('docsSection').classList.remove('hidden');
+                activeComp.requiredDocs.forEach(documentName => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'doc-item';
+                    wrapper.innerHTML = `
+                        <label>${documentName} (Fichier obligatoire)</label>
+                        <input type="file" class="dynamic-doc-input" data-docname="${documentName}">
+                    `;
+                    documentsGrid.appendChild(wrapper);
+                });
+            } else {
+                document.getElementById('docsSection').classList.add('hidden');
+            }
+
+            modalWindow.style.display = 'flex';
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Impossible de lire le fichier sélectionné.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /**
+         * FONCTION 5 : LOGIQUE DE VALIDATION STRICTE ET DÉCOMPTE
+         */
+        document.getElementById('bookingForm').onsubmit = async function(event) {
+            event.preventDefault();
+            
+            const selectedIdx = document.getElementById('userLevel').value;
+            const finalChoice = activeBoat.levels[selectedIdx];
+            if (!finalChoice || parseInt(finalChoice.seats, 10) <= 0) {
+                alert('Cette classe est complète. Actualisez la page et choisissez une autre classe.');
+                return;
+            }
+            const dynamicFiles = document.querySelectorAll('.dynamic-doc-input');
+            const paymentFile = document.getElementById('payImg')?.files?.[0];
+
+            // --- 1. VÉRIFICATION STRICTE DES DOCUMENTS ---
+            for (let fileInput of dynamicFiles) {
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    const docName = fileInput.getAttribute('data-docname');
+                    alert(`Attention : il manque le document "${docName}".\n\nL'armateur ${activeComp.companyName} exige ce document pour autoriser l'accès au navire.`);
+                    return;
+                }
+            }
+
+            if (!paymentFile) {
+                alert('Attention : la preuve de paiement est obligatoire pour finaliser la réservation.');
+                return;
+            }
+
+            // --- 2. VÉRIFICATION FINALE DES PLACES ---
+            try {
+                const docPayload = await Promise.all(Array.from(dynamicFiles).map(async (fileInput) => ({
+                    name: fileInput.getAttribute('data-docname'),
+                    data: await readFileAsDataUrl(fileInput.files[0])
+                })));
+
+                const payImgData = await readFileAsDataUrl(paymentFile);
+
+                const bookingRecord = {
+                    client: document.getElementById('userName').value,
+                    email: document.getElementById('userEmail').value,
+                    whatsapp: document.getElementById('userWhatsapp').value,
+                    telephone: document.getElementById('userPhone').value,
+                    compagnie: activeComp.companyName,
+                    bateau: activeBoat.name,
+                    niveau: finalChoice.label,
+                    prix: finalChoice.price,
+                    date: new Date().toLocaleDateString('fr-FR'),
+                    heure: new Date().toLocaleTimeString('fr-FR'),
+                    statut: "En attente de validation",
+                    docsSoumis: docPayload,
+                    payImg: payImgData
+                };
+
+                await apiRequest('api.php?action=reservations', {
+                    method: 'POST',
+                    body: JSON.stringify(bookingRecord)
+                });
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+
+            alert(`Votre dossier a été transmis à ${activeComp.companyName}.\n\nIls examineront vos documents et vous enverront le ticket sur WhatsApp (${document.getElementById('userWhatsapp').value || document.getElementById('userPhone').value}) ou par Email.`);
+            
+            location.reload();
+        };
+
+        /**
+         * FONCTION 6 : UTILITAIRES D'INTERFACE
+         */
+        function returnToCompanyView() {
+            renderCompanyGallery();
+        }
+
+        function closeModalWindow() {
+            document.getElementById('resModal').style.display = 'none';
+        }
+
+        // DÉMARRAGE DE L'APPLICATION
+        loadCompanies().catch(error => {
+            document.getElementById('mainGrid').innerHTML = `<div class="no-results"><p style="color:var(--error-red)">${error.message}</p></div>`;
+        });
+
+    </script>
+</body>
+</html>

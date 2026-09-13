@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1677ff">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="logokp.png">
+    <link rel="apple-touch-icon" href="logokp.png">
+    <title>KivuPass Pro | Administration Armateurs & Super Admin</title>
+    
+    <!-- BIBLIOTHÈQUES EXTERNES -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 
+           ========================================
+           THÈME ET VARIABLES GLOBALES
+           ========================================
+        */
+        :root {
+            --dark: #07152f;
+            --card-bg: #101f3b;
+            --accent: #1677ff;
+            --gold: #35e548;
+            --text: #ffffff;
+            --text-gray: #94a3b8;
+            --danger: #ff4d4d;
+            --success: #35e548;
+            --border: #263d64;
+            --orange: #ff6600;
+            --airtel: #ff0000;
+            --mpesa: #00e676;
+            --africell: #4b0082;
+        }
+
+        /* RÉINITIALISATION */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        /* 
+           ========================================
+           NAVIGATION ET EN-TÊTE
+           ========================================
+        */
+        .header {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .logo { font-size: 26px; font-weight: 700; color: var(--gold); text-decoration: none; }
+        .logo span { color: var(--accent); }
+
+        .admin-nav {
+            background: #111;
+            padding: 12px 5%;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 65px;
+            z-index: 999;
+            overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--text-gray);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+        }
+        .nav-tab:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-tab.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 168, 255, 0.3); }
+
+        /* 
+           ========================================
+           STRUCTURE DES CONTENEURS
+           ========================================
+        */
+        .container { width: 95%; max-width: 1350px; margin: 35px auto; }
+
+        .glass-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            margin-bottom: 40px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .form-group { margin-bottom: 30px; }
+        label { display: block; margin-bottom: 12px; font-weight: 600; color: var(--gold); font-size: 15px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 15px 20px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(0,168,255,0.2); }
+
+        /* 
+           ========================================
+           SECTION PAIEMENTS (GRID)
+           ========================================
+        */
+        .pay-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            background: rgba(0,0,0,0.3);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .pay-item { position: relative; }
+        .pay-item i { position: absolute; left: 18px; top: 48px; font-size: 20px; }
+        .pay-item input { padding-left: 55px; }
+
+        /* 
+           ========================================
+           CONFIG BATEAU & CALENDRIER
+           ========================================
+        */
+        .boat-config {
+            background: #1c2128;
+            margin-top: 45px;
+            padding: 30px;
+            border-radius: 25px;
+            border-left: 6px solid var(--accent);
+            position: relative;
+        }
+
+        .schedule-container { overflow-x: auto; margin: 20px 0; }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0d1117;
+            border-radius: 15px;
+            overflow: hidden;
+            min-width: 600px;
+        }
+        .schedule-table th { background: #21262d; color: var(--accent); padding: 15px; text-align: center; font-size: 13px; font-weight: 700; }
+        .schedule-table td { padding: 12px; border: 1px solid var(--border); text-align: center; }
+        .schedule-table input { 
+            padding: 10px; 
+            font-size: 12px; 
+            text-align: center; 
+            width: 90px; 
+            border-radius: 8px; 
+            margin: 2px;
+        }
+
+        .level-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .level-box {
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px dotted var(--gold);
+        }
+
+        /* 
+           ========================================
+           DASHBOARD ET ACTIONS
+           ========================================
+        */
+        .boat-selector { display: flex; gap: 12px; margin-bottom: 30px; overflow-x: auto; padding: 10px 0; }
+        .boat-btn {
+            background: #21262d;
+            border: 1px solid var(--accent);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .boat-btn.active { background: var(--accent); box-shadow: 0 0 20px rgba(0,168,255,0.5); transform: scale(1.05); }
+
+        .dashboard-toolbar { display: flex; gap: 14px; align-items: end; margin: 24px 0; }
+        .dashboard-toolbar .form-group { flex: 1; margin-bottom: 0; }
+        .dashboard-toolbar .btn-sm { min-height: 48px; }
+        .dashboard-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 24px 0; }
+        .metric-card { padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: #0d1117; }
+        .metric-card strong { display: block; font-size: 28px; line-height: 1; margin-top: 8px; }
+        .metric-card span { color: var(--text-gray); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+        .metric-total strong { color: var(--accent); }
+        .metric-pending strong { color: #ffeb3b; }
+        .metric-valid strong { color: var(--success); }
+        .metric-reject strong { color: var(--danger); }
+        .dashboard-message { padding: 22px; border: 1px dashed var(--border); border-radius: 14px; color: var(--text-gray); text-align: center; }
+
+        .res-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #0d1117;
+        }
+        table.res-main-table { width: 100%; min-width: 920px; border-collapse: collapse; }
+        .res-main-table th { background: #21262d; color: var(--accent); padding: 18px; text-align: left; font-size: 14px; }
+        .res-main-table td { padding: 18px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: middle; }
+        .res-main-table tbody tr:last-child td { border-bottom: 0; }
+        .res-main-table tbody tr:hover { background: rgba(0,168,255,0.04); }
+        .reservation-detail { display: grid; gap: 4px; min-width: 150px; }
+        .reservation-detail strong { color: #fff; }
+        .reservation-detail small { color: var(--text-gray); }
+        .reservation-date { color: var(--gold); font-size: 12px; }
+
+        /* 
+           ========================================
+           VISIONNEUSE D'IMAGES (ZOOM)
+           ========================================
+        */
+        .img-preview-container { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
+        .thumb-img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .thumb-img:hover { transform: scale(1.15) rotate(2deg); border-color: var(--accent); }
+
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(8px);
+        }
+        .zoom-content {
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            transition: transform 0.4s ease;
+        }
+        .zoom-toolbar {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            gap: 25px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 40px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        .close-zoom { position: absolute; top: 30px; right: 40px; font-size: 45px; color: white; cursor: pointer; transition: 0.3s; }
+        .close-zoom:hover { color: var(--danger); transform: rotate(90deg); }
+
+        /* 
+           ========================================
+           BOUTONS ET BADGES STATUT
+           ========================================
+        */
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-sm { padding: 10px 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 700; transition: 0.3s; }
+        .btn-valid { background: var(--success); color: white; }
+        .btn-reject { background: var(--danger); color: white; }
+        
+        .notif-bar { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-sms { background: #0084FF; color: white; }
+        .btn-mail { background: #EA4335; color: white; }
+
+        .status-badge { padding: 6px 14px; border-radius: 50px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-pending { background: #5a4b00; color: #ffeb3b; border: 1px solid #ffeb3b; }
+        .st-valid { background: #0b3d2a; color: #35e548; border: 1px solid #35e548; }
+        .st-reject { background: #4d0a0a; color: #ff4d4d; border: 1px solid #ff4d4d; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 760px) {
+            .container { width: 100%; margin: 20px auto; }
+            .glass-card { padding: 22px 14px; border-radius: 18px; }
+            .glass-card h2 { font-size: 20px; }
+            .res-table-wrap { overflow: visible; border: 0; background: transparent; }
+            table.res-main-table { min-width: 0; }
+            table.res-main-table,
+            .res-main-table thead,
+            .res-main-table tbody,
+            .res-main-table tr,
+            .res-main-table td { display: block; width: 100%; min-width: 0; }
+            .res-main-table thead { display: none; }
+            .res-main-table tr {
+                margin-bottom: 16px;
+                padding: 14px;
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                background: #101f3b;
+            }
+            .res-main-table tbody tr:last-child { margin-bottom: 0; }
+            .res-main-table td {
+                display: grid;
+                grid-template-columns: 112px minmax(0, 1fr);
+                gap: 12px;
+                align-items: center;
+                padding: 11px 0;
+                border-bottom: 1px solid rgba(48,54,61,0.75);
+            }
+            .res-main-table td:last-child { border-bottom: 0; }
+            .res-main-table td::before {
+                content: attr(data-label);
+                color: var(--text-gray);
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .4px;
+            }
+            .res-main-table td:first-child { align-items: start; }
+            .res-main-table td:first-child::before { padding-top: 6px; }
+            .img-preview-container { justify-content: flex-start; }
+            .notif-bar { margin-top: 0; }
+            .btn-sm { padding: 9px 11px; }
+            .dashboard-toolbar { align-items: stretch; flex-direction: column; }
+            .dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .metric-card strong { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATION DES SECTIONS -->
+<nav class="admin-nav">
+    <div class="nav-tab active" onclick="switchTab('config')"><i class="fas fa-cog"></i> 1. Configuration Flotte</div>
+    <div class="nav-tab" onclick="switchTab('dashboard')"><i class="fas fa-users-cog"></i> 2. Dashboard Réservations</div>
+    <div class="nav-tab" onclick="switchTab('superadmin')"><i class="fas fa-user-shield"></i> 3. Administrateur (Super Admin)</div>
+</nav>
+
+<main class="container">
+
+    <!-- 
+       ========================================
+       SECTION 1 : CONFIGURATION INSCRIPTION
+       ========================================
+    -->
+    <section id="section-config">
+        <div class="glass-card">
+            <h2 style="color: var(--accent); margin-bottom: 30px;"><i class="fas fa-ship"></i> Paramétrage de la Compagnie</h2>
+            
+            <div class="form-group">
+                <label>Nom Officiel de l'Entreprise</label>
+                <input type="text" id="compName" placeholder="Ex: Silimu, Ihusi, Etoile du Kivu...">
+            </div>
+            <div class="form-group">
+                <label>Logo de la compagnie (utilisé sur les billets)</label>
+                <input type="file" id="companyLogo" accept="image/*">
+            </div>
+
+            <!-- CONFIGURATION PAIEMENTS -->
+            <label><i class="fas fa-wallet"></i> Configuration Mobile Money (Réception)</label>
+            <div class="pay-grid">
+                <div class="pay-item">
+                    <label>Orange Money</label>
+                    <i class="fas fa-mobile-alt" style="color: var(--orange);"></i>
+                    <input type="text" id="payOrange" placeholder="Numéro de réception">
+                </div>
+                <div class="pay-item">
+                    <label>Airtel Money</label>
+                    <i class="fas fa-mobile-alt" style="color: var(--airtel);"></i>
+                    <input type="text" id="payAirtel" placeholder="Numéro de réception">
+                </div>
+                <div class="pay-item">
+                    <label>Vodacom (M-Pesa)</label>
+                    <i class="fas fa-mobile-alt" style="color: var(--mpesa);"></i>
+                    <input type="text" id="payVodacom" placeholder="Numéro de réception">
+                </div>
+                <div class="pay-item">
+                    <label>Africell</label>
+                    <i class="fas fa-mobile-alt" style="color: var(--accent);"></i>
+                    <input type="text" id="payAfricell" placeholder="Numéro de réception">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 35px;">
+                <label>Documents requis lors de l'embarquement (ex: CPGL, ID)</label>
+                <div id="docsListContainer"></div>
+                <button class="btn-sm" style="background: var(--border); color: white; margin-top: 10px;" onclick="addDocRequirement()">+ Ajouter une exigence documentaire</button>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre de navires à mettre en ligne</label>
+                <input type="number" id="boatCount" min="1" placeholder="Ex: 3">
+                <button class="btn-sm" style="background: var(--accent); color: white; width: 100%; margin-top: 20px; padding: 18px; font-size: 15px;" onclick="initBoatForms()">GÉNÉRER LES FICHES NAVIRES</button>
+            </div>
+
+            <!-- ZONE DYNAMIQUE POUR LES BATEAUX -->
+            <div id="boatsList"></div>
+            
+            <button id="finalSave" class="hidden btn-sm" style="background: var(--success); color:white; margin-top: 50px; width: 100%; padding: 25px; font-size: 18px; border-radius: 20px;" onclick="saveAllToStorage()">
+                <i class="fas fa-cloud-upload-alt"></i> FINALISER ET PUBLIER SUR KIVUPASS
+            </button>
+        </div>
+    </section>
+
+    <!-- 
+       ========================================
+       SECTION 2 : DASHBOARD ARMATEUR
+       ========================================
+    -->
+    <section id="section-dashboard" class="hidden">
+        <div class="glass-card">
+            <h2>Gestion des Passagers en Temps Réel</h2>
+            <div class="dashboard-toolbar">
+                <div class="form-group">
+                    <label for="selectMyComp">Compagnie :</label>
+                    <select id="selectMyComp" onchange="loadBoatOptions()"></select>
+                </div>
+                <div class="form-group">
+                    <label for="selectMyBoat">Navire :</label>
+                    <select id="selectMyBoat"></select>
+                </div>
+                <div class="form-group">
+                    <label for="boatPassword">Mot de passe du navire :</label>
+                    <input id="boatPassword" type="password" autocomplete="current-password" placeholder="Mot de passe">
+                </div>
+                <button class="btn-sm" style="background: var(--success); color: white;" onclick="loginBoat()"><i class="fas fa-lock-open"></i> Ouvrir</button>
+                <button id="refreshDashboardBtn" class="btn-sm" style="background: var(--accent); color: white;" onclick="refreshArmateurDashboard()" title="Actualiser les réservations">
+                    <i class="fas fa-sync-alt"></i> Actualiser
+                </button>
+                <button class="btn-sm" style="background: var(--danger); color: white;" onclick="logoutArmateur()"><i class="fas fa-sign-out-alt"></i> Fermer</button>
+            </div>
+
+            <div id="armateurMessage" class="dashboard-message">Connectez le navire pour accéder à ses réservations.</div>
+            <div id="armateurContent" class="hidden">
+                <div class="dashboard-metrics" aria-live="polite">
+                    <div class="metric-card metric-total"><span>Total</span><strong id="metricTotal">0</strong></div>
+                    <div class="metric-card metric-pending"><span>En attente</span><strong id="metricPending">0</strong></div>
+                    <div class="metric-card metric-valid"><span>Validées</span><strong id="metricValid">0</strong></div>
+                    <div class="metric-card metric-reject"><span>Rejetées</span><strong id="metricReject">0</strong></div>
+                </div>
+                <div id="boatTabs" class="boat-selector"></div>
+                <div style="display:flex; justify-content:space-between; gap:15px; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
+                    <h3 id="currentBoatTitle" style="color: var(--gold);">Navire</h3>
+                    <input id="reservationSearch" type="search" placeholder="Rechercher un nom ou billet" oninput="renderReservationList()" style="width:240px; margin:0;">
+                    <select id="reservationStatusFilter" style="width:auto; min-width:190px; margin:0;" onchange="renderReservationList()" aria-label="Filtrer par statut">
+                        <option value="all">Tous les statuts</option>
+                        <option value="En attente de validation">En attente</option>
+                        <option value="Validé">Validées</option>
+                        <option value="Rejeté">Rejetées</option>
+                    </select>
+                </div>
+                <div class="dashboard-metrics" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                    <div class="metric-card metric-valid"><span>Réservations acceptées</span><strong id="acceptedListCount">0</strong><small id="acceptedList" style="display:block;color:var(--text-gray);margin-top:10px;"></small></div>
+                    <div class="metric-card metric-reject"><span>Réservations refusées</span><strong id="rejectedListCount">0</strong><small id="rejectedList" style="display:block;color:var(--text-gray);margin-top:10px;"></small></div>
+                </div>
+                
+                <div class="res-table-wrap">
+                    <table class="res-main-table">
+                        <thead>
+                            <tr>
+                                <th>Preuves / Images</th>
+                                <th>Passager & Contacts</th>
+                                <th>Détails Voyage</th>
+                                <th>État Ticket</th>
+                                <th>Action Validation</th>
+                                <th>Expédier Ticket</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resTableBody"><tr><td colspan="6"><div class="dashboard-message">Sélectionnez un navire pour afficher ses réservations.</div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 
+       ========================================
+    SECTION 3 : SUPER ADMIN (ADMINISTRATEUR)
+       ========================================
+    -->
+    <section id="section-superadmin" class="hidden">
+        <div class="glass-card">
+            <h2 style="color: var(--danger);"><i class="fas fa-shield-alt"></i> Administration Centrale</h2>
+            <hr style="border: 0.5px solid #333; margin: 20px 0;">
+            <div id="superAdminLogin">
+                <p class="dashboard-message">Accès réservé à l’Administrateur.</p>
+                <input id="superAdminPassword" type="password" autocomplete="current-password" placeholder="Mot de passe super-admin">
+                <button class="btn-sm btn-valid" style="margin-top:12px;" onclick="loginSuperAdmin()"><i class="fas fa-key"></i> Se connecter</button>
+            </div>
+            <div id="superAdminContent" class="hidden">
+                <button class="btn-sm btn-reject" style="margin-bottom:18px;" onclick="logoutSuperAdmin()"><i class="fas fa-sign-out-alt"></i> Fermer la session</button>
+                <div id="superAdminBody"></div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODALE DE ZOOM (LIGHTBOX ANTI-FRAUDE) -->
+<div id="zoomModal" class="zoom-modal">
+    <span class="close-zoom" onclick="closeZoom()">&times;</span>
+    <img id="zoomedImg" class="zoom-content" src="" alt="Détail Image">
+    <div class="zoom-toolbar">
+        <button class="btn-sm" style="background: white;" onclick="changeZoom(0.3)"><i class="fas fa-plus"></i></button>
+        <button class="btn-sm" style="background: white;" onclick="changeZoom(-0.3)"><i class="fas fa-minus"></i></button>
+        <button class="btn-sm" style="background: #eee;" onclick="resetZoom()">Reset</button>
+    </div>
+</div>
+
+<div id="acceptanceModal" class="zoom-modal" style="display:none; padding:20px;">
+    <div class="glass-card" style="width:min(560px,100%); margin:0;">
+        <h2 style="color:var(--success);">Formulaire d’acceptation</h2>
+        <p id="acceptancePassenger" style="color:var(--text-gray); margin:10px 0 20px;"></p>
+        <label>Logo à afficher sur le billet</label>
+        <input type="file" id="acceptanceLogo" accept="image/*">
+        <label>Message et consignes pour le passager</label>
+        <textarea id="acceptanceMessage" rows="4" placeholder="Présentez ce billet à l’embarquement..."></textarea>
+        <div class="btn-group" style="margin-top:18px;">
+            <button class="btn-sm btn-valid" onclick="submitAcceptance()">Valider et envoyer le billet</button>
+            <button class="btn-sm btn-reject" onclick="closeAcceptance()">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<script src="common.js"></script>
+<script>
+    /* 
+       ========================================
+       LOGIQUE JAVASCRIPT KIVUPASS ENGINE
+       ========================================
+    */
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+    let currentZoomScale = 1;
+    let activeCompanyName = '';
+    let activeBoatName = '';
+    let dashboardReservations = [];
+    let availableCompanies = [];
+    let acceptanceReservationId = null;
+
+    async function apiRequest(url, options = {}) {
+        const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erreur de communication avec le serveur.');
+        return data;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[character]));
+    }
+
+    // --- NAVIGATION ---
+    function switchTab(id) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('section-' + id).classList.remove('hidden');
+        if(event) event.currentTarget.classList.add('active');
+        if(id === 'dashboard') fillCompanySelect();
+        if(id === 'superadmin') loadSuperAdmin();
+    }
+
+    // --- CONFIGURATION D'INSCRIPTION ---
+    function addDocRequirement() {
+        const container = document.getElementById('docsListContainer');
+        const div = document.createElement('div');
+        div.className = 'doc-entry';
+        div.style = "display:flex; gap:10px; margin-bottom:12px";
+        div.innerHTML = `<input type="text" class="doc-name" placeholder="Nom du document">
+                         <button onclick="this.parentElement.remove()" style="background:var(--danger); border:none; color:white; border-radius:10px; width:45px; cursor:pointer;"><i class="fas fa-trash"></i></button>`;
+        container.appendChild(div);
+    }
+
+    function initBoatForms() {
+        const count = document.getElementById('boatCount').value;
+        const list = document.getElementById('boatsList');
+        list.innerHTML = '';
+        if (count < 1) return alert("Veuillez saisir un nombre valide.");
+
+        for (let i = 1; i <= count; i++) {
+            const div = document.createElement('div');
+            div.className = 'boat-config';
+            div.innerHTML = `
+                <h3><i class="fas fa-ship"></i> Configuration Navire #${i}</h3>
+                <input type="text" class="boat-name" placeholder="Nom du bateau" style="margin:15px 0">
+                <label>Mot de passe privé du navire</label>
+                <input type="password" class="boat-password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum">
+                
+                <label>Horaires Hebdomadaires (Matin / Après-midi)</label>
+                <div class="schedule-container">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr><th>Jour</th><th>Dép. Matin</th><th>Arr. Matin</th><th>Dép. Après-midi</th><th>Arr. Après-midi</th></tr>
+                        </thead>
+                        <tbody>
+                            ${days.map(d => `
+                            <tr class="day-row" data-day="${d}">
+                                <td><strong>${d}</strong></td>
+                                <td><input type="text" class="m-dep" placeholder="07:30"></td>
+                                <td><input type="text" class="m-arr" placeholder="11:00"></td>
+                                <td><input type="text" class="a-dep" placeholder="14:00"></td>
+                                <td><input type="text" class="a-arr" placeholder="17:30"></td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <label>Classes de Prix & Capacités</label>
+                <input type="number" class="level-count" placeholder="Combien de classes ? (ex: 2)" onchange="genBoatLevels(this, ${i})">
+                <div id="levels-box-${i}" class="level-container"></div>
+            `;
+            list.appendChild(div);
+        }
+        document.getElementById('finalSave').classList.remove('hidden');
+    }
+
+    function genBoatLevels(input, bIdx) {
+        const box = document.getElementById(`levels-box-${bIdx}`);
+        box.innerHTML = '';
+        for (let j = 1; j <= input.value; j++) {
+            box.innerHTML += `
+                <div class="level-box">
+                    <label>Nom Classe (ex: VIP)</label>
+                    <input type="text" class="l-label">
+                    <label>Prix ($)</label>
+                    <input type="number" class="l-price">
+                    <label>Total Places</label>
+                    <input type="number" class="l-seats">
+                </div>`;
+        }
+    }
+
+    async function saveAllToStorage() {
+        const companyName = document.getElementById('compName').value.trim();
+        if(!companyName) return alert("Nom de compagnie requis.");
+
+        let fleet = [];
+        document.querySelectorAll('.boat-config').forEach(bDiv => {
+            let sched = {};
+            bDiv.querySelectorAll('.day-row').forEach(row => {
+                sched[row.dataset.day] = {
+                    morning: { dep: row.querySelector('.m-dep').value, arr: row.querySelector('.m-arr').value },
+                    afternoon: { dep: row.querySelector('.a-dep').value, arr: row.querySelector('.a-arr').value }
+                };
+            });
+            let levels = [];
+            bDiv.querySelectorAll('.level-box').forEach(lBox => {
+                levels.push({ 
+                    label: lBox.querySelector('.l-label').value, 
+                    price: lBox.querySelector('.l-price').value, 
+                    seats: lBox.querySelector('.l-seats').value 
+                });
+            });
+            fleet.push({
+                name: bDiv.querySelector('.boat-name').value,
+                password: bDiv.querySelector('.boat-password').value,
+                schedule: sched,
+                levels: levels
+            });
+        });
+
+        const fullData = {
+            id: Date.now(),
+            companyName,
+            payments: {
+                orange: document.getElementById('payOrange').value,
+                airtel: document.getElementById('payAirtel').value,
+                vodacom: document.getElementById('payVodacom').value,
+                africell: document.getElementById('payAfricell').value
+            },
+            requiredDocs: Array.from(document.querySelectorAll('.doc-name')).map(i => i.value),
+            fleet,
+            approved: false,
+            logo: document.getElementById('companyLogo').dataset.value || ''
+        };
+
+        try {
+            await apiRequest('api.php?action=companies', { method: 'POST', body: JSON.stringify(fullData) });
+        } catch (error) {
+            return alert(error.message);
+        }
+        alert("Dossier envoyé ! L’Administrateur va valider votre accès.");
+        location.reload();
+    }
+
+    document.getElementById('companyLogo').addEventListener('change', async function () {
+        if (this.files[0]) {
+            this.dataset.value = await readImage(this.files[0]);
+            localStorage.setItem('kivupass_logo', this.dataset.value);
+        }
+    });
+
+    // --- LOGIQUE DASHBOARD ---
+    async function fillCompanySelect() {
+        const select = document.getElementById('selectMyComp');
+        select.disabled = true;
+        select.innerHTML = '<option value="">Chargement des compagnies...</option>';
+        try {
+            const data = await apiRequest('api.php?action=companies');
+            const companies = data.filter(c => c.approved);
+            availableCompanies = companies;
+            select.innerHTML = companies.length
+                ? '<option value="">Choisir une compagnie</option>' + companies.map(c => `<option value="${escapeHtml(c.companyName)}">${escapeHtml(c.companyName)}</option>`).join('')
+                : '<option value="">Aucune compagnie approuvée</option>';
+            select.disabled = companies.length === 0;
+            if (!companies.length) document.getElementById('armateurContent').classList.add('hidden');
+            loadBoatOptions();
+        } catch (error) {
+            select.innerHTML = '<option value="">Impossible de charger les compagnies</option>';
+            document.getElementById('armateurContent').classList.add('hidden');
+        }
+    }
+
+    function loadBoatOptions() {
+        const company = availableCompanies.find(item => item.companyName === document.getElementById('selectMyComp').value);
+        const boatSelect = document.getElementById('selectMyBoat');
+        boatSelect.innerHTML = company && company.fleet.length
+            ? company.fleet.map(boat => `<option value="${escapeHtml(boat.name)}">${escapeHtml(boat.name)}</option>`).join('')
+            : '<option value="">Choisir une compagnie</option>';
+    }
+
+    async function loginBoat() {
+        const companyName = document.getElementById('selectMyComp').value;
+        const boatName = document.getElementById('selectMyBoat').value;
+        const password = document.getElementById('boatPassword').value;
+        if (!companyName || !boatName || !password) return alert('Sélectionnez la compagnie, le navire et saisissez son mot de passe.');
+        try {
+            await apiRequest('api.php?action=boat-login', { method: 'POST', body: JSON.stringify({ companyName, boatName, password }) });
+            document.getElementById('boatPassword').value = '';
+            document.getElementById('armateurMessage').classList.add('hidden');
+            await loadArmateurDashboard();
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function logoutArmateur() {
+        await apiRequest('api.php?action=logout', { method: 'POST' });
+        activeCompanyName = '';
+        activeBoatName = '';
+        dashboardReservations = [];
+        document.getElementById('armateurContent').classList.add('hidden');
+        document.getElementById('armateurMessage').classList.remove('hidden');
+        updateDashboardMetrics([]);
+    }
+
+    async function loadArmateurDashboard() {
+        const compName = document.getElementById('selectMyComp').value;
+        const content = document.getElementById('armateurContent');
+        if (!compName) {
+            content.classList.add('hidden');
+            return;
+        }
+        content.classList.remove('hidden');
+        activeCompanyName = compName;
+        document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Chargement des navires...</div>';
+        try {
+            const data = await apiRequest('api.php?action=companies');
+            const comp = data.find(c => c.companyName === compName);
+            if (!comp || !Array.isArray(comp.fleet) || !comp.fleet.length) {
+                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun navire configuré pour cette compagnie.</div>';
+                dashboardReservations = [];
+                updateDashboardMetrics([]);
+                document.getElementById('resTableBody').innerHTML = '<tr><td colspan="6"><div class="dashboard-message">Aucune réservation à afficher.</div></td></tr>';
+                return;
+            }
+            const fleet = comp.fleet.filter(boat => boat && boat.name);
+            if (!fleet.length) {
+                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun navire configuré pour cette compagnie.</div>';
+                return;
+            }
+            if (!activeBoatName || !fleet.some(boat => boat.name === activeBoatName)) activeBoatName = fleet[0].name;
+            renderBoatTabs([{ name: activeBoatName }]);
+            await showBoatResList(activeCompanyName, activeBoatName);
+        } catch (error) {
+            document.getElementById('boatTabs').innerHTML = `<div class="dashboard-message">${escapeHtml(error.message)}</div>`;
+            document.getElementById('resTableBody').innerHTML = '';
+        }
+    }
+
+    function renderBoatTabs(fleet) {
+        const tabs = document.getElementById('boatTabs');
+        tabs.innerHTML = fleet.map((boat, index) => `<button class="boat-btn ${index === 0 ? 'active' : ''}" data-boat-name="${escapeHtml(boat.name)}" onclick="selectBoat(this)">${escapeHtml(boat.name)}</button>`).join('');
+    }
+
+    function selectBoat(button) {
+        activeBoatName = button.dataset.boatName;
+        document.querySelectorAll('.boat-btn').forEach(item => item.classList.toggle('active', item === button));
+        showBoatResList(activeCompanyName, activeBoatName);
+    }
+
+    async function showBoatResList(compName, boatName, btn) {
+        if(btn) {
+            document.querySelectorAll('.boat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        activeCompanyName = compName;
+        activeBoatName = boatName;
+        document.getElementById('currentBoatTitle').innerText = "Liste des passagers : " + boatName;
+        const body = document.getElementById('resTableBody');
+        body.innerHTML = '<tr><td colspan="6"><div class="dashboard-message">Chargement des réservations...</div></td></tr>';
+        try {
+            const allRes = await apiRequest('api.php?action=reservations');
+            dashboardReservations = allRes.filter(r => r.compagnie === compName && r.bateau === boatName);
+            updateDashboardMetrics(dashboardReservations);
+            renderReservationList();
+        } catch (error) {
+            dashboardReservations = [];
+            updateDashboardMetrics([]);
+            body.innerHTML = `<tr><td colspan="6"><div class="dashboard-message">${escapeHtml(error.message)}</div></td></tr>`;
+        }
+    }
+
+    function updateDashboardMetrics(reservations) {
+        const count = status => reservations.filter(r => (r.statut || 'En attente de validation') === status).length;
+        document.getElementById('metricTotal').textContent = reservations.length;
+        document.getElementById('metricPending').textContent = count('En attente de validation');
+        document.getElementById('metricValid').textContent = count('Validé');
+        document.getElementById('metricReject').textContent = count('Rejeté');
+    }
+
+    function renderReservationList() {
+        const filter = document.getElementById('reservationStatusFilter').value;
+        const search = (document.getElementById('reservationSearch').value || '').toLowerCase();
+        const filtered = dashboardReservations
+            .filter(r => filter === 'all' || (r.statut || 'En attente de validation') === filter)
+            .filter(r => !search || `${r.client} ${r.ticketCode || ''}`.toLowerCase().includes(search))
+            .sort((a, b) => b.id - a.id);
+        const accepted = dashboardReservations.filter(r => ['Validé', 'Arrivé'].includes(r.statut));
+        const rejected = dashboardReservations.filter(r => r.statut === 'Rejeté');
+        document.getElementById('acceptedListCount').textContent = accepted.length;
+        document.getElementById('rejectedListCount').textContent = rejected.length;
+        document.getElementById('acceptedList').textContent = accepted.map(r => `${r.client} (${r.ticketCode || 'sans référence'})`).join(' · ') || 'Aucune réservation acceptée';
+        document.getElementById('rejectedList').textContent = rejected.map(r => r.client).join(' · ') || 'Aucune réservation refusée';
+        const body = document.getElementById('resTableBody');
+        if (!filtered.length) {
+            body.innerHTML = '<tr><td colspan="6"><div class="dashboard-message">Aucune réservation pour ce filtre.</div></td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(r => {
+            const st = r.statut || "En attente";
+            const stClass = st === 'Validé' || st === 'Arrivé' ? 'st-valid' : (st === 'Rejeté' ? 'st-reject' : 'st-pending');
+            
+            const docsList = Array.isArray(r.docsSoumis) ? r.docsSoumis : [];
+            let imgsHtml = `<div class="img-preview-container">
+                <img src="${r.payImg || 'https://via.placeholder.com/150?text=Preuve'}" class="thumb-img" title="Preuve de Paiement" onclick="openZoom(this.src)">`;
+            docsList.forEach(d => {
+                const docSrc = typeof d === 'string' ? d : (d?.data || 'https://via.placeholder.com/150?text=Document');
+                const docTitle = typeof d === 'string' ? d : (d?.name || 'Document');
+                imgsHtml += `<img src="${docSrc}" class="thumb-img" title="${docTitle}" onclick="openZoom(this.src)">`;
+            });
+            imgsHtml += `</div>`;
+
+            return `<tr>
+                <td data-label="Documents">${imgsHtml}</td>
+                <td data-label="Passager"><div class="reservation-detail"><strong>${escapeHtml(r.client)}</strong><small>${escapeHtml(r.email)}</small><small>${escapeHtml(r.whatsapp || r.telephone || 'N/A')}</small></div></td>
+                <td data-label="Voyage"><div class="reservation-detail"><strong>${escapeHtml(r.niveau)} · ${escapeHtml(r.prix)}$</strong><small>${escapeHtml(r.bateau)}</small><small class="reservation-date">${escapeHtml(r.date || '')} à ${escapeHtml(r.heure || '')}</small></div></td>
+                <td data-label="Statut"><span class="status-badge ${stClass}">${escapeHtml(st)}</span></td>
+                <td data-label="Validation">
+                    <div class="btn-group">
+                        ${st === 'En attente de validation' ? `<button class="btn-sm btn-valid" onclick="openAcceptance(${r.id})">Accepter</button><button class="btn-sm btn-reject" onclick="updateStatus(${r.id}, 'Rejeté')">Rejeter</button>` : ''}
+                        ${st === 'Validé' ? `<button class="btn-sm btn-valid" onclick="checkIn(${r.id})">${r.checkedIn ? 'Client arrivé' : 'Marquer arrivé'}</button>` : ''}
+                    </div>
+                </td>
+                <td data-label="Envoyer">
+                    <div class="notif-bar">
+                        <button class="btn-sm btn-wa" onclick="sendTicket(${r.id}, 'wa')"><i class="fab fa-whatsapp"></i></button>
+                        <button class="btn-sm btn-sms" onclick="sendTicket(${r.id}, 'sms')"><i class="fas fa-sms"></i></button>
+                        <button class="btn-sm btn-mail" onclick="sendTicket(${r.id}, 'mail')"><i class="fas fa-envelope"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function refreshArmateurDashboard() {
+        if (!activeCompanyName || !activeBoatName) return loadArmateurDashboard();
+        const button = document.getElementById('refreshDashboardBtn');
+        button.disabled = true;
+        try {
+            await showBoatResList(activeCompanyName, activeBoatName);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    async function updateStatus(id, stat) {
+        await apiRequest('api.php?action=reservation-status', {
+            method: 'PATCH', body: JSON.stringify({ id, statut: stat })
+        });
+        await showBoatResList(activeCompanyName, activeBoatName);
+    }
+
+    function openAcceptance(id) {
+        const reservation = dashboardReservations.find(item => item.id === id);
+        acceptanceReservationId = id;
+        document.getElementById('acceptancePassenger').textContent = `Billet pour ${reservation.client} · ${reservation.bateau}`;
+        document.getElementById('acceptanceLogo').value = '';
+        document.getElementById('acceptanceMessage').value = `Votre réservation est acceptée. Présentez ce billet à l’embarquement.`;
+        document.getElementById('acceptanceModal').style.display = 'flex';
+    }
+
+    function closeAcceptance() { document.getElementById('acceptanceModal').style.display = 'none'; }
+
+    function readImage(file) {
+        return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+    }
+
+    async function submitAcceptance() {
+        const file = document.getElementById('acceptanceLogo').files[0];
+        if (!file) return alert('Ajoutez le logo qui doit figurer sur le billet.');
+        try {
+            await apiRequest('api.php?action=accept-reservation', { method: 'POST', body: JSON.stringify({
+                id: acceptanceReservationId, acceptanceLogo: await readImage(file), message: document.getElementById('acceptanceMessage').value.trim()
+            }) });
+            closeAcceptance();
+            await showBoatResList(activeCompanyName, activeBoatName);
+            alert('Billet accepté et prêt à être envoyé.');
+        } catch (error) { alert(error.message); }
+    }
+
+    async function checkIn(id) {
+        if (!confirm('Confirmer l’arrivée de ce passager ?')) return;
+        await apiRequest('api.php?action=reservation-checkin', { method: 'PATCH', body: JSON.stringify({ id }) });
+        await showBoatResList(activeCompanyName, activeBoatName);
+    }
+
+    async function sendTicket(id, canal) {
+        const reservations = await apiRequest('api.php?action=reservations');
+        const r = reservations.find(x => x.id == id);
+        const msg = r.acceptanceMessage || `Bonjour ${r.client}, votre réservation KivuPass pour ${r.bateau} est : ${r.statut.toUpperCase()}. Présentez ce message à l’embarquement.`;
+        const phone = r.whatsapp || r.telephone || "243000000000";
+
+        if(canal === 'wa') window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+        else if(canal === 'sms') window.location.href = `sms:${phone}?body=${encodeURIComponent(msg)}`;
+        else window.location.href = `mailto:${r.email}?subject=Ticket KivuPass&body=${encodeURIComponent(msg)}`;
+    }
+
+    // --- ZOOM LOGIC ---
+    function openZoom(src) {
+        document.getElementById('zoomModal').style.display = 'flex';
+        document.getElementById('zoomedImg').src = src;
+        resetZoom();
+    }
+    function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+    function changeZoom(val) { currentZoomScale += val; document.getElementById('zoomedImg').style.transform = `scale(${currentZoomScale})`; }
+    function resetZoom() { currentZoomScale = 1; document.getElementById('zoomedImg').style.transform = `scale(1)`; }
+
+    // --- SUPER ADMIN ---
+    async function loadSuperAdmin() {
+        document.getElementById('superAdminLogin').classList.remove('hidden');
+        document.getElementById('superAdminContent').classList.add('hidden');
+    }
+
+    async function loginSuperAdmin() {
+        try {
+            await apiRequest('api.php?action=super-admin-login', {
+                method: 'POST',
+                body: JSON.stringify({ password: document.getElementById('superAdminPassword').value })
+            });
+            document.getElementById('superAdminPassword').value = '';
+            document.getElementById('superAdminLogin').classList.add('hidden');
+            document.getElementById('superAdminContent').classList.remove('hidden');
+            await renderSuperAdmin();
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    async function logoutSuperAdmin() {
+        await apiRequest('api.php?action=logout', { method: 'POST' });
+        loadSuperAdmin();
+    }
+
+    async function renderSuperAdmin() {
+        const data = await apiRequest('api.php?action=companies');
+        const body = document.getElementById('superAdminBody');
+        body.innerHTML = '';
+        data.forEach((c, index) => {
+            body.innerHTML += `
+                <div class="glass-card" style="margin-bottom:20px; padding:20px; border-left: 8px solid ${c.approved?'#35e548':'#1677ff'}">
+                    <h3 style="margin:0">${c.companyName} <span style="font-size:12px; color:var(--text-gray);">(${c.fleet.length} Navires)</span></h3>
+                    <div style="margin-top:10px">
+                        ${!c.approved ? `<button class="btn-sm btn-valid" onclick="superApprove(${c.id})">AUTORISER PUBLICATION</button>` : '<span style="color:#35e548; font-weight:bold;">PUBLIÉ SUR L\'INDEX</span>'}
+                        <button class="btn-sm btn-reject" onclick="superDelete(${c.id})">SUPPRIMER COMPAGNIE</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    async function superApprove(id) {
+        await apiRequest('api.php?action=company-status', {
+            method: 'PATCH', body: JSON.stringify({ id, approved: true })
+        });
+        renderSuperAdmin();
+    }
+
+    async function superDelete(id) {
+        if(confirm("Action définitive. Supprimer cette compagnie ?")) {
+            await apiRequest(`api.php?action=company&id=${id}`, { method: 'DELETE' });
+            renderSuperAdmin();
+        }
+    }
+</script>
+</body>
+</html>

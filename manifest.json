@@ -1,0 +1,26 @@
+{
+  "name": "KivuPass - Reservation Lac Kivu",
+  "short_name": "KivuPass",
+  "description": "Plateforme de reservation et de gestion des voyages sur le Lac Kivu.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07152f",
+  "theme_color": "#1677ff",
+  "icons": [
+    {
+      "src": "logokp.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logokp.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
