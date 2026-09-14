@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-const DB_HOST = '127.0.0.1';
-const DB_PORT = 3307;
-const DB_NAME = 'kivupass';
-const DB_USER = 'root';
-const DB_PASS = '';
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', (int)(getenv('DB_PORT') ?: 3307));
+define('DB_NAME', getenv('DB_NAME') ?: 'kivupass');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 const SUPER_ADMIN_PASSWORD_HASH = '$2y$10$BB3YCCj7kXsC0PhEzfJ/JOQ94Yiz07Qaw0uS23hSCA06.sBth58ey';
 
 function startAppSession(): void
