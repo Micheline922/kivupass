@@ -6,6 +6,7 @@ RUN docker-php-ext-install pdo_mysql \
     && a2enmod rewrite \
     && chown -R www-data:www-data /var/www/html
 
+COPY php.ini /usr/local/etc/php/conf.d/kivupass.ini
 COPY . /var/www/html/
 
 # Render fournit la variable PORT au demarrage du conteneur.
