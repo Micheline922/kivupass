@@ -190,6 +190,40 @@
             font-size: 20px;
         }
 
+        @media (max-width: 600px) {
+            .hero {
+                min-height: 360px;
+                height: auto;
+                padding: 72px 18px 84px;
+            }
+
+            .hero h1 {
+                font-size: clamp(1.8rem, 9vw, 2.5rem);
+                line-height: 1.15;
+            }
+
+            .hero p {
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 0;
+            }
+
+            .search-container {
+                margin-top: -34px;
+                padding: 0 12px;
+            }
+
+            .search-box {
+                width: 100%;
+                padding: 10px 16px;
+            }
+
+            .search-box input {
+                font-size: 15px;
+                margin-left: 10px;
+            }
+        }
+
         /* 
            =========================================
            4. GRID SYSTEM ET CARDS
@@ -914,6 +948,31 @@
             });
         }
 
+        function readBookingFile(file) {
+            if (!file.type.startsWith('image/') || file.size <= 1400000) {
+                return readFileAsDataUrl(file);
+            }
+
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                const reader = new FileReader();
+                reader.onload = () => {
+                    image.onload = () => {
+                        const scale = Math.min(1, 1600 / Math.max(image.width, image.height));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(image.width * scale));
+                        canvas.height = Math.max(1, Math.round(image.height * scale));
+                        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.78));
+                    };
+                    image.onerror = () => reject(new Error('Impossible de traiter cette image.'));
+                    image.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('Impossible de lire le fichier sélectionné.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
         /**
          * FONCTION 5 : LOGIQUE DE VALIDATION STRICTE ET DÉCOMPTE
          */
@@ -947,10 +1006,10 @@
             try {
                 const docPayload = await Promise.all(Array.from(dynamicFiles).map(async (fileInput) => ({
                     name: fileInput.getAttribute('data-docname'),
-                    data: await readFileAsDataUrl(fileInput.files[0])
+                    data: await readBookingFile(fileInput.files[0])
                 })));
 
-                const payImgData = await readFileAsDataUrl(paymentFile);
+                const payImgData = await readBookingFile(paymentFile);
 
                 const bookingRecord = {
                     client: document.getElementById('userName').value,
