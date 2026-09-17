@@ -1,5 +1,3 @@
-CREATE DATABASE IF NOT EXISTS kivupass CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE kivupass;
 
 -- Utilisateur central de la plateforme (MCD : ADMINISTRATEUR).
 CREATE TABLE IF NOT EXISTS administrators (

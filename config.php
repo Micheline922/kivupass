@@ -61,7 +61,7 @@ function requestBody(): array
 function requireArmateurSession(): array
 {
     if (empty($_SESSION['armateur'])) {
-        jsonResponse(['error' => 'Authentification navire requise.'], 401);
+        jsonResponse(['error' => 'Authentification bateau requise.'], 401);
     }
 
     return $_SESSION['armateur'];

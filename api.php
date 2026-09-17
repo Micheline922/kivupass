@@ -37,7 +37,7 @@ try {
             }
         }
         if (!$company || !(bool)$company['approved'] || !$boat || empty($boat['passwordHash']) || !password_verify($password, $boat['passwordHash'])) {
-            jsonResponse(['error' => 'Compagnie, navire ou mot de passe incorrect.'], 401);
+            jsonResponse(['error' => 'Compagnie, bateau ou mot de passe incorrect.'], 401);
         }
         session_regenerate_id(true);
         $_SESSION['armateur'] = [
@@ -88,10 +88,10 @@ try {
         $fleet = array_values($body['fleet'] ?? []);
         foreach ($fleet as &$boat) {
             if (trim((string)($boat['name'] ?? '')) === '' || strlen((string)($boat['password'] ?? '')) < 8) {
-                jsonResponse(['error' => 'Chaque navire doit avoir un mot de passe d’au moins 8 caractères.'], 422);
+                jsonResponse(['error' => 'Chaque bateau doit avoir un mot de passe d’au moins 8 caractères.'], 422);
             }
             if (empty($boat['levels']) || !is_array($boat['levels'])) {
-                jsonResponse(['error' => 'Chaque navire doit avoir au moins une classe tarifaire.'], 422);
+                jsonResponse(['error' => 'Chaque bateau doit avoir au moins une classe tarifaire.'], 422);
             }
             foreach ($boat['levels'] as $level) {
                 if (trim((string)($level['label'] ?? '')) === '' || !is_numeric($level['price'] ?? null) || (int)($level['seats'] ?? 0) < 1) {
@@ -113,12 +113,52 @@ try {
         jsonResponse(['success' => true, 'id' => (int)$pdo->lastInsertId()], 201);
     }
 
+    if ($method === 'PATCH' && $action === 'companies') {
+        $companyName = trim((string)($body['companyName'] ?? ''));
+        if ($companyName === '') {
+            jsonResponse(['error' => 'Le nom de la compagnie est requis.'], 422);
+        }
+
+        $fleet = array_values($body['fleet'] ?? []);
+        foreach ($fleet as &$boat) {
+            if (trim((string)($boat['name'] ?? '')) === '' || strlen((string)($boat['password'] ?? '')) < 8) {
+                jsonResponse(['error' => 'Chaque bateau doit avoir un mot de passe d’au moins 8 caractères.'], 422);
+            }
+            if (empty($boat['levels']) || !is_array($boat['levels'])) {
+                jsonResponse(['error' => 'Chaque bateau doit avoir au moins une classe tarifaire.'], 422);
+            }
+            foreach ($boat['levels'] as $level) {
+                if (trim((string)($level['label'] ?? '')) === '' || !is_numeric($level['price'] ?? null) || (int)($level['seats'] ?? 0) < 1) {
+                    jsonResponse(['error' => 'Chaque classe doit avoir un nom, un prix et au moins une place.'], 422);
+                }
+            }
+            $boat['passwordHash'] = password_hash((string)$boat['password'], PASSWORD_DEFAULT);
+            unset($boat['password']);
+        }
+        unset($boat);
+
+        $stmt = $pdo->prepare('UPDATE companies SET payments = ?, required_docs = ?, fleet = ?, logo = ? WHERE company_name = ?');
+        $stmt->execute([
+            json_encode($body['payments'] ?? [], JSON_UNESCAPED_UNICODE),
+            json_encode(array_values($body['requiredDocs'] ?? []), JSON_UNESCAPED_UNICODE),
+            json_encode($fleet, JSON_UNESCAPED_UNICODE),
+            $body['logo'] ?? null,
+            $companyName,
+        ]);
+        jsonResponse(['success' => $stmt->rowCount() > 0]);
+    }
+
     if ($method === 'POST' && $action === 'reservations') {
         $required = ['client', 'email', 'compagnie', 'bateau', 'niveau', 'prix'];
         foreach ($required as $field) {
             if (!isset($body[$field]) || trim((string)$body[$field]) === '') {
                 jsonResponse(['error' => 'Champ requis manquant: ' . $field], 422);
             }
+        }
+
+        $jourVoyage = trim((string)($body['jourVoyage'] ?? $body['date'] ?? ''));
+        if ($jourVoyage === '') {
+            jsonResponse(['error' => 'La date de voyage est obligatoire.'], 422);
         }
 
         $pdo->beginTransaction();
@@ -157,8 +197,8 @@ try {
         if (!$levelFound) {
             $pdo->rollBack();
             $error = !$boatFound
-                ? 'Le navire sélectionné est introuvable.'
-                : (!$levelAvailable ? 'La classe sélectionnée est introuvable pour ce navire.' : 'La classe sélectionnée est complète.');
+                ? 'Le bateau sélectionné est introuvable.'
+                : (!$levelAvailable ? 'La classe sélectionnée est introuvable pour ce bateau.' : 'La classe sélectionnée est complète.');
             jsonResponse(['error' => $error], 409);
         }
 
@@ -167,7 +207,7 @@ try {
         $insert = $pdo->prepare('INSERT INTO reservations (client, email, whatsapp, telephone, compagnie, bateau, niveau, prix, reservation_date, reservation_time, statut, docs_soumis, pay_img) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $insert->execute([
             $body['client'], $body['email'], $body['whatsapp'] ?? '', $body['telephone'] ?? '', $body['compagnie'],
-            $body['bateau'], $body['niveau'], $body['prix'], $body['date'] ?? date('d/m/Y'),
+            $body['bateau'], $body['niveau'], $body['prix'], $jourVoyage,
             $body['heure'] ?? date('H:i:s'), 'En attente de validation', json_encode($body['docsSoumis'] ?? [], JSON_UNESCAPED_UNICODE), $body['payImg'] ?? null,
         ]);
         $pdo->commit();

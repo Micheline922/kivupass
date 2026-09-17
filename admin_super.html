@@ -51,10 +51,7 @@
     <script src="common.js"></script>
     <script>
         async function apiRequest(url, options = {}) {
-            const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Erreur de communication avec le serveur.');
-            return data;
+            return safeApiRequest(url, options);
         }
 
         async function renderSuperAdmin() {
@@ -66,7 +63,7 @@
                 table.innerHTML += `
                     <tr>
                         <td><strong>${c.companyName}</strong></td>
-                        <td>${c.fleet.length} navire(s)</td>
+                        <td>${c.fleet.length} bateau(x)</td>
                         <td><span class="status status-${c.approved ? 'approved' : 'pending'}">${c.approved ? 'Approuvé' : 'En attente'}</span></td>
                         <td>
                             ${!c.approved ? `<button class="btn btn-approve" onclick="toggleApprove(${c.id}, true)">Approuver</button>` : `<button class="btn btn-reject" onclick="toggleApprove(${c.id}, false)">Bloquer</button>`}

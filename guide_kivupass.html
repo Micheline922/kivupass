@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KivuPass | Guide d’utilisation</title>
+  <link rel="icon" type="image/png" href="logokp.png" />
+  <style>
+    :root {
+      --bg: #07152f;
+      --panel: #0f1d34;
+      --panel-soft: #101f3b;
+      --line: #263d64;
+      --text: #eaf3ff;
+      --muted: #9bb4d0;
+      --primary: #1677ff;
+      --green: #35e548;
+      --warning: #ffb703;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #07152f 0%, #0a1830 100%);
+      color: var(--text);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(22,119,255,.22), rgba(53,229,72,.12));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 36px 28px;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 1.05rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: rgba(16,31,59,.9);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+    }
+    .badge.blue { background: rgba(22,119,255,.12); color: #7ec2ff; }
+    .badge.green { background: rgba(53,229,72,.12); color: #8af0a4; }
+    .badge.gold { background: rgba(255,183,3,.12); color: #ffd166; }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1.5rem;
+    }
+    p, li {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 0.98rem;
+    }
+    ul {
+      padding-left: 18px;
+      margin: 12px 0 0;
+    }
+    ol {
+      padding-left: 20px;
+      margin: 12px 0 0;
+    }
+    .cta {
+      margin-top: 30px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .note {
+      background: rgba(255,183,3,.06);
+      border: 1px solid rgba(255,183,3,.25);
+      border-radius: 12px;
+      padding: 16px 18px;
+      color: #ffe7a3;
+      margin-top: 22px;
+    }
+    @media (max-width: 640px) {
+      .container { padding-top: 24px; }
+      .hero { padding: 24px 18px; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>KivuPass</h1>
+      <p>
+        KivuPass est une plateforme de réservation lacustre conçue pour simplifier l’accès aux billets,
+        sécuriser les données des passagers et aider les armateurs à gérer leurs réservations plus facilement.
+      </p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="badge blue">Pourquoi c’est utile</div>
+        <h2>Une solution pour mieux organiser les traversées</h2>
+        <p>
+          Avant KivuPass, les réservations se faisaient souvent de manière manuelle, peu sécurisée et difficilement traçable.
+          Cette plateforme centralise les demandes, permet de suivre les réservations et facilite la validation des clients.
+        </p>
+        <ul>
+          <li>Réduction des erreurs dans les inscriptions.</li>
+          <li>Meilleure visibilité sur les places restantes.</li>
+          <li>Validation rapide pour les armateurs.</li>
+          <li>Meilleure expérience pour les passagers.</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="badge green">Son importance</div>
+        <h2>Un outil de confiance pour les utilisateurs</h2>
+        <p>
+          KivuPass apporte un cadre plus sérieux et professionnel à la réservation des billets sur le lac.
+          Il protège les informations, structure le processus de réservation et aide les entreprises à mieux gérer leur flot de voyageurs.
+        </p>
+        <ul>
+          <li>Réservation en ligne au lieu d’un système improvisé.</li>
+          <li>Suivi des dossiers de réservation.</li>
+          <li>Transmission des justificatifs et preuves de paiement.</li>
+          <li>Validation de l’embarquement avec des tickets.</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="badge gold">Pour les clients</div>
+        <h2>Comment réserver un billet</h2>
+        <ol>
+          <li>Le client ouvre la page d’accueil et choisit une compagnie.</li>
+          <li>Il sélectionne le bateau concerné et la classe tarifaire disponible.</li>
+          <li>Il remplit ses informations personnelles et son email/WhatsApp.</li>
+          <li>Il télécharge les documents demandés par l’armateur.</li>
+          <li>Il ajoute la preuve de paiement mobile money.</li>
+          <li>Il valide le formulaire pour soumettre sa réservation.</li>
+          <li>L’armateur reçoit la demande et décide d’accepter ou de refuser.</li>
+          <li>Une fois validée, le client reçoit un ticket et peut embarquer.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top: 24px;">
+      <div class="badge blue">Pour les armateurs</div>
+      <h2>Comment s’inscrire et gérer la plateforme</h2>
+      <ol>
+        <li>Un armateur accède à l’espace armateur depuis le menu principal.</li>
+        <li>Il remplit les informations de sa compagnie, ses moyens de paiement et les documents requis.</li>
+        <li>Il configure un ou plusieurs bateaux, avec leur mot de passe et les classes tarifaires.</li>
+        <li>Il soumet son dossier pour validation par l’administrateur de la plateforme.</li>
+        <li>Quand son compte est approuvé, il se connecte avec le nom de la compagnie, le bateau et le mot de passe.</li>
+        <li>Il peut alors voir les réservations, accepter ou refuser les demandes et envoyer le ticket.</li>
+      </ol>
+      <div class="note">
+        Important : le compte armateur ne devient actif qu’après validation de l’administrateur de la plateforme.
+      </div>
+    </section>
+
+    <div class="cta">
+      <a class="btn" href="index.html">Voir l’accueil</a>
+      <a class="btn secondary" href="enterprise.html">Accéder à l’espace armateur</a>
+    </div>
+  </div>
+</body>
+</html>

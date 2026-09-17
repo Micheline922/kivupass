@@ -2,12 +2,55 @@
     const logo = 'logokp.png';
     const logoMarkup = `<img src="${logo}" alt="KivuPass" class="site-logo-image">`;
 
+    window.safeApiRequest = async function (url, options = {}) {
+        const fetchOptions = {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            }
+        };
+
+        try {
+            const response = await fetch(url, fetchOptions);
+            const contentType = response.headers.get('content-type') || '';
+            let data = {};
+
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                if (!text) {
+                    throw new Error('Le serveur n’a renvoyé aucune réponse exploitable.');
+                }
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error('La réponse du serveur est invalide.');
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erreur de communication avec le serveur.');
+            }
+
+            return data;
+        } catch (error) {
+            const message = error && error.message ? error.message : 'Erreur inconnue du serveur.';
+            if (error instanceof TypeError || /Failed to fetch/i.test(message)) {
+                throw new Error('Impossible de joindre le serveur KivuPass. Vérifiez votre connexion ou attendez quelques secondes avant de réessayer.');
+            }
+            throw new Error(message);
+        }
+    };
+
     if (!document.querySelector('[data-site-shell="navbar"]')) {
         const nav = document.createElement('nav');
         nav.className = 'site-navbar';
         nav.dataset.siteShell = 'navbar';
         nav.innerHTML = `<a href="index.html" class="site-brand">${logoMarkup}</a>
-            <div class="site-nav-links"><a href="index.html">Accueil</a><a href="enterprise.html">Espace armateur</a></div>`;
+            <div class="site-nav-links"><a href="index.html">Accueil</a><a href="guide_kivupass.html">Guide</a><a href="enterprise.html">Espace armateur</a></div>`;
         document.body.prepend(nav);
     }
 
@@ -16,7 +59,7 @@
         footer.className = 'site-footer';
         footer.dataset.siteShell = 'footer';
         footer.innerHTML = `<div class="site-footer-brand">KivuPass<br><small>Réservation lacustre sécurisée</small></div>
-            <div class="site-footer-links"><strong>Navigation</strong><a href="index.html">Accueil</a><a href="enterprise.html">Espace armateur</a></div>
+            <div class="site-footer-links"><strong>Navigation</strong><a href="index.html">Accueil</a><a href="guide_kivupass.html">Guide</a><a href="enterprise.html">Espace armateur</a></div>
             <div class="site-footer-links"><strong>Nous joindre</strong><div class="site-contact-icons"><a class="site-contact-icon email" href="mailto:michelinekalehezo@gmail.com" aria-label="Email : michelinekalehezo@gmail.com" title="michelinekalehezo@gmail.com"><i class="fas fa-envelope"></i></a><a class="site-contact-icon phone" href="tel:0896883974" aria-label="Téléphone : 0896883974" title="0896883974"><i class="fas fa-phone"></i></a><a class="site-contact-icon whatsapp" href="https://wa.me/243992056878" target="_blank" rel="noopener" aria-label="WhatsApp : 0992056878" title="0992056878"><i class="fab fa-whatsapp"></i></a><a class="site-contact-icon facebook" href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><i class="fab fa-facebook-f"></i></a></div></div>
             <small>© ${new Date().getFullYear()}</small>`;
         document.body.appendChild(footer);

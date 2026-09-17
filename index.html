@@ -663,6 +663,11 @@
                         <input type="tel" id="userPhone" class="form-input" placeholder="Ex: 243..." required>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-day"></i> Jour du voyage</label>
+                    <input type="date" id="travelDate" class="form-input" required>
+                </div>
                 
                 <!-- Sélection de la classe -->
                 <div class="form-group">
@@ -717,10 +722,7 @@
         let activeBoat = null;
 
         async function apiRequest(url, options = {}) {
-            const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Erreur de communication avec le serveur.');
-            return data;
+            return safeApiRequest(url, options);
         }
 
         async function loadCompanies() {
@@ -792,7 +794,7 @@
                 compCard.innerHTML = `
                     ${company.logo ? `<img src="${company.logo}" class="company-logo" alt="Logo ${company.companyName}">` : '<div class="company-logo"><i class="fas fa-image main-icon"></i></div>'}
                     <h3>${company.companyName}</h3>
-                    <div class="fleet-count">${company.fleet.length} Navires en opération</div>
+                    <div class="fleet-count">${company.fleet.length} bateaux en opération</div>
                     ${contactsHtml}
                 `;
                 gridContainer.appendChild(compCard);
@@ -849,7 +851,7 @@
                         <h3>${boat.name}</h3>
                         <div class="levels-container">${pricingTableHtml}</div>
                         <button class="btn-reserve" onclick="triggerBookingProcess(${index})" ${hasAvailableLevel ? '' : 'disabled'}>
-                            ${hasAvailableLevel ? 'Réserver sur ce navire' : 'Navire complet'}
+                            ${hasAvailableLevel ? 'Réserver sur ce bateau' : 'Bateau complet'}
                         </button>
                     </div>`;
                 gridContainer.appendChild(boatCard);
@@ -895,20 +897,21 @@
 
             activeBoat = activeComp.fleet[boatIndex];
             if (!activeBoat) {
-                alert('Ce navire n’est plus disponible. Actualisez la page.');
+                alert('Ce bateau n’est plus disponible. Actualisez la page.');
                 return;
             }
             const modalWindow = document.getElementById('resModal');
             const summaryText = document.getElementById('resInfo');
             const dropdownSelect = document.getElementById('userLevel');
             const documentsGrid = document.getElementById('docsArea');
+            document.getElementById('travelDate').value = '';
 
-            summaryText.innerText = `Armateur : ${activeComp.companyName} | Navire : ${activeBoat.name}`;
+            summaryText.innerText = `Armateur : ${activeComp.companyName} | Bateau : ${activeBoat.name}`;
             
             // Construction des options de classes
             const availableLevels = activeBoat.levels.filter(level => parseInt(level.seats, 10) > 0);
             if (!availableLevels.length) {
-                alert('Ce navire est complet pour toutes les classes disponibles.');
+                alert('Ce bateau est complet pour toutes les classes disponibles.');
                 return;
             }
             dropdownSelect.innerHTML = activeBoat.levels.map((level, idx) => {
@@ -992,7 +995,7 @@
             for (let fileInput of dynamicFiles) {
                 if (!fileInput.files || fileInput.files.length === 0) {
                     const docName = fileInput.getAttribute('data-docname');
-                    alert(`Attention : il manque le document "${docName}".\n\nL'armateur ${activeComp.companyName} exige ce document pour autoriser l'accès au navire.`);
+                    alert(`Attention : il manque le document "${docName}".\n\nL'armateur ${activeComp.companyName} exige ce document pour autoriser l'accès au bateau.`);
                     return;
                 }
             }
@@ -1020,7 +1023,8 @@
                     bateau: activeBoat.name,
                     niveau: finalChoice.label,
                     prix: finalChoice.price,
-                    date: new Date().toLocaleDateString('fr-FR'),
+                    date: document.getElementById('travelDate').value || new Date().toISOString().slice(0,10),
+                    jourVoyage: document.getElementById('travelDate').value || new Date().toISOString().slice(0,10),
                     heure: new Date().toLocaleTimeString('fr-FR'),
                     statut: "En attente de validation",
                     docsSoumis: docPayload,

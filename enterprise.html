@@ -424,9 +424,9 @@
             </div>
 
             <div class="form-group">
-                <label>Nombre de navires à mettre en ligne</label>
+                <label>Nombre de bateaux à mettre en ligne</label>
                 <input type="number" id="boatCount" min="1" placeholder="Ex: 3">
-                <button class="btn-sm" style="background: var(--accent); color: white; width: 100%; margin-top: 20px; padding: 18px; font-size: 15px;" onclick="initBoatForms()">GÉNÉRER LES FICHES NAVIRES</button>
+                <button class="btn-sm" style="background: var(--accent); color: white; width: 100%; margin-top: 20px; padding: 18px; font-size: 15px;" onclick="initBoatForms()">GÉNÉRER LES FICHES BATEAUX</button>
             </div>
 
             <!-- ZONE DYNAMIQUE POUR LES BATEAUX -->
@@ -452,21 +452,22 @@
                     <select id="selectMyComp" onchange="loadBoatOptions()"></select>
                 </div>
                 <div class="form-group">
-                    <label for="selectMyBoat">Navire :</label>
+                    <label for="selectMyBoat">Bateau :</label>
                     <select id="selectMyBoat"></select>
                 </div>
                 <div class="form-group">
-                    <label for="boatPassword">Mot de passe du navire :</label>
+                    <label for="boatPassword">Mot de passe du bateau :</label>
                     <input id="boatPassword" type="password" autocomplete="current-password" placeholder="Mot de passe">
                 </div>
                 <button class="btn-sm" style="background: var(--success); color: white;" onclick="loginBoat()"><i class="fas fa-lock-open"></i> Ouvrir</button>
+                <button class="btn-sm" style="background: var(--accent); color: white;" onclick="addBoatToCompany()"><i class="fas fa-plus"></i> Ajouter un bateau</button>
                 <button id="refreshDashboardBtn" class="btn-sm" style="background: var(--accent); color: white;" onclick="refreshArmateurDashboard()" title="Actualiser les réservations">
                     <i class="fas fa-sync-alt"></i> Actualiser
                 </button>
                 <button class="btn-sm" style="background: var(--danger); color: white;" onclick="logoutArmateur()"><i class="fas fa-sign-out-alt"></i> Fermer</button>
             </div>
 
-            <div id="armateurMessage" class="dashboard-message">Connectez le navire pour accéder à ses réservations.</div>
+            <div id="armateurMessage" class="dashboard-message">Connectez le bateau pour accéder à ses réservations.</div>
             <div id="armateurContent" class="hidden">
                 <div class="dashboard-metrics" aria-live="polite">
                     <div class="metric-card metric-total"><span>Total</span><strong id="metricTotal">0</strong></div>
@@ -476,7 +477,7 @@
                 </div>
                 <div id="boatTabs" class="boat-selector"></div>
                 <div style="display:flex; justify-content:space-between; gap:15px; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
-                    <h3 id="currentBoatTitle" style="color: var(--gold);">Navire</h3>
+                    <h3 id="currentBoatTitle" style="color: var(--gold);">Bateau</h3>
                     <input id="reservationSearch" type="search" placeholder="Rechercher un nom ou billet" oninput="renderReservationList()" style="width:240px; margin:0;">
                     <select id="reservationStatusFilter" style="width:auto; min-width:190px; margin:0;" onchange="renderReservationList()" aria-label="Filtrer par statut">
                         <option value="all">Tous les statuts</option>
@@ -502,7 +503,7 @@
                                 <th>Expédier Ticket</th>
                             </tr>
                         </thead>
-                        <tbody id="resTableBody"><tr><td colspan="6"><div class="dashboard-message">Sélectionnez un navire pour afficher ses réservations.</div></td></tr></tbody>
+                        <tbody id="resTableBody"><tr><td colspan="6"><div class="dashboard-message">Sélectionnez un bateau pour afficher ses réservations.</div></td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -574,10 +575,7 @@
     let acceptanceReservationId = null;
 
     async function apiRequest(url, options = {}) {
-        const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Erreur de communication avec le serveur.');
-        return data;
+        return safeApiRequest(url, options);
     }
 
     function escapeHtml(value) {
@@ -617,9 +615,9 @@
             const div = document.createElement('div');
             div.className = 'boat-config';
             div.innerHTML = `
-                <h3><i class="fas fa-ship"></i> Configuration Navire #${i}</h3>
+                <h3><i class="fas fa-ship"></i> Configuration Bateau #${i}</h3>
                 <input type="text" class="boat-name" placeholder="Nom du bateau" style="margin:15px 0">
-                <label>Mot de passe privé du navire</label>
+                <label>Mot de passe privé du bateau</label>
                 <input type="password" class="boat-password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum">
                 
                 <label>Horaires Hebdomadaires (Matin / Après-midi)</label>
@@ -715,7 +713,11 @@
         } catch (error) {
             return alert(error.message);
         }
-        alert("Dossier envoyé ! L’Administrateur va valider votre accès.");
+
+        const mailSubject = encodeURIComponent('Nouvelle demande d’inscription KivuPass - ' + companyName);
+        const mailBody = encodeURIComponent('Bonjour,\n\nUne nouvelle société vient de demander son inscription sur KivuPass.\n\nCompagnie: ' + companyName + '\n\nMerci de la valider depuis le panneau super admin.');
+        window.location.href = `mailto:michelinekalehezo@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+        alert("Dossier envoyé ! L’Administrateur va valider votre accès et un message a été préparé vers votre email.");
         location.reload();
     }
 
@@ -755,11 +757,64 @@
             : '<option value="">Choisir une compagnie</option>';
     }
 
+    async function addBoatToCompany() {
+        const companyName = document.getElementById('selectMyComp').value;
+        if (!companyName) {
+            alert('Sélectionnez d’abord une compagnie.');
+            return;
+        }
+
+        const boatName = prompt('Nom du nouveau bateau :');
+        if (!boatName || !boatName.trim()) return;
+
+        const boatPassword = prompt('Mot de passe du bateau (8 caractères minimum) :');
+        if (!boatPassword || boatPassword.length < 8) {
+            alert('Le mot de passe du bateau doit contenir au moins 8 caractères.');
+            return;
+        }
+
+        const levelLabel = prompt('Nom de la classe tarifaire (ex: Standard, VIP) :', 'Standard');
+        const levelPrice = Number(prompt('Prix de la classe (USD) :', '30')) || 30;
+        const levelSeats = Number(prompt('Nombre de places :', '20')) || 20;
+
+        try {
+            const data = await apiRequest('api.php?action=companies');
+            const company = data.find(c => c.companyName === companyName);
+            if (!company) {
+                alert('Compagnie introuvable.');
+                return;
+            }
+
+            const updatedFleet = [...(company.fleet || []), {
+                name: boatName.trim(),
+                password: boatPassword,
+                schedule: {},
+                levels: [{ label: (levelLabel || 'Standard').trim(), price: Number(levelPrice), seats: Number(levelSeats) }]
+            }];
+
+            await apiRequest('api.php?action=companies', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    companyName: company.companyName,
+                    payments: company.payments || {},
+                    requiredDocs: company.requiredDocs || [],
+                    fleet: updatedFleet,
+                    logo: company.logo || ''
+                })
+            });
+
+            alert('Le nouveau bateau a été ajouté avec succès.');
+            await loadArmateurDashboard();
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
     async function loginBoat() {
         const companyName = document.getElementById('selectMyComp').value;
         const boatName = document.getElementById('selectMyBoat').value;
         const password = document.getElementById('boatPassword').value;
-        if (!companyName || !boatName || !password) return alert('Sélectionnez la compagnie, le navire et saisissez son mot de passe.');
+        if (!companyName || !boatName || !password) return alert('Sélectionnez la compagnie, le bateau et saisissez son mot de passe.');
         try {
             await apiRequest('api.php?action=boat-login', { method: 'POST', body: JSON.stringify({ companyName, boatName, password }) });
             document.getElementById('boatPassword').value = '';
@@ -789,12 +844,12 @@
         }
         content.classList.remove('hidden');
         activeCompanyName = compName;
-        document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Chargement des navires...</div>';
+        document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Chargement des bateaux...</div>';
         try {
             const data = await apiRequest('api.php?action=companies');
             const comp = data.find(c => c.companyName === compName);
             if (!comp || !Array.isArray(comp.fleet) || !comp.fleet.length) {
-                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun navire configuré pour cette compagnie.</div>';
+                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun bateau configuré pour cette compagnie.</div>';
                 dashboardReservations = [];
                 updateDashboardMetrics([]);
                 document.getElementById('resTableBody').innerHTML = '<tr><td colspan="6"><div class="dashboard-message">Aucune réservation à afficher.</div></td></tr>';
@@ -802,7 +857,7 @@
             }
             const fleet = comp.fleet.filter(boat => boat && boat.name);
             if (!fleet.length) {
-                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun navire configuré pour cette compagnie.</div>';
+                document.getElementById('boatTabs').innerHTML = '<div class="dashboard-message">Aucun bateau configuré pour cette compagnie.</div>';
                 return;
             }
             if (!activeBoatName || !fleet.some(boat => boat.name === activeBoatName)) activeBoatName = fleet[0].name;
@@ -985,9 +1040,9 @@
         const reservations = await apiRequest('api.php?action=reservations');
         const r = reservations.find(x => x.id == id);
         const msg = r.acceptanceMessage || `Bonjour ${r.client}, votre réservation KivuPass pour ${r.bateau} est : ${r.statut.toUpperCase()}. Présentez ce message à l’embarquement.`;
-        const phone = r.whatsapp || r.telephone || "243000000000";
+        const phone = (r.whatsapp || r.telephone || "243000000000").replace(/\D/g, '');
 
-        if(canal === 'wa') window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+        if(canal === 'wa') window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         else if(canal === 'sms') window.location.href = `sms:${phone}?body=${encodeURIComponent(msg)}`;
         else window.location.href = `mailto:${r.email}?subject=Ticket KivuPass&body=${encodeURIComponent(msg)}`;
     }
@@ -1035,7 +1090,7 @@
         data.forEach((c, index) => {
             body.innerHTML += `
                 <div class="glass-card" style="margin-bottom:20px; padding:20px; border-left: 8px solid ${c.approved?'#35e548':'#1677ff'}">
-                    <h3 style="margin:0">${c.companyName} <span style="font-size:12px; color:var(--text-gray);">(${c.fleet.length} Navires)</span></h3>
+                    <h3 style="margin:0">${c.companyName} <span style="font-size:12px; color:var(--text-gray);">(${c.fleet.length} bateaux)</span></h3>
                     <div style="margin-top:10px">
                         ${!c.approved ? `<button class="btn-sm btn-valid" onclick="superApprove(${c.id})">AUTORISER PUBLICATION</button>` : '<span style="color:#35e548; font-weight:bold;">PUBLIÉ SUR L\'INDEX</span>'}
                         <button class="btn-sm btn-reject" onclick="superDelete(${c.id})">SUPPRIMER COMPAGNIE</button>

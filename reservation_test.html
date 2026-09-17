@@ -107,15 +107,7 @@
     <script src="common.js"></script>
     <script>
         async function apiRequest(url, options = {}) {
-            const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
-                ...options
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Erreur serveur');
-            }
-            return data;
+            return safeApiRequest(url, options);
         }
 
         function setStatus(message, isError = false) {
