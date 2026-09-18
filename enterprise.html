@@ -552,8 +552,19 @@
         <input type="file" id="acceptanceLogo" accept="image/*">
         <label>Message et consignes pour le passager</label>
         <textarea id="acceptanceMessage" rows="4" placeholder="Présentez ce billet à l’embarquement..."></textarea>
+        <fieldset style="border:1px solid var(--border); border-radius:10px; padding:14px; margin-top:16px;">
+            <legend style="padding:0 8px; color:var(--text-gray); font-size:12px;">Mode d’envoi du billet</legend>
+            <label style="display:flex; align-items:center; gap:8px; margin:6px 0; cursor:pointer;">
+                <input type="radio" name="acceptanceChannel" value="wa" checked>
+                <i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; margin:6px 0; cursor:pointer;">
+                <input type="radio" name="acceptanceChannel" value="mail">
+                <i class="fas fa-envelope" style="color:#EA4335;"></i> Envoi normal par e-mail
+            </label>
+        </fieldset>
         <div class="btn-group" style="margin-top:18px;">
-            <button class="btn-sm btn-valid" onclick="submitAcceptance()">Valider et envoyer le billet</button>
+            <button class="btn-sm btn-valid" onclick="submitAcceptance()">Valider et envoyer</button>
             <button class="btn-sm btn-reject" onclick="closeAcceptance()">Annuler</button>
         </div>
     </div>
@@ -1003,6 +1014,7 @@
         document.getElementById('acceptancePassenger').textContent = `Billet pour ${reservation.client} · ${reservation.bateau}`;
         document.getElementById('acceptanceLogo').value = '';
         document.getElementById('acceptanceMessage').value = `Votre réservation est acceptée. Présentez ce billet à l’embarquement.`;
+        document.querySelector('input[name="acceptanceChannel"][value="wa"]').checked = true;
         document.getElementById('acceptanceModal').style.display = 'flex';
     }
 
@@ -1036,18 +1048,15 @@
         const file = document.getElementById('acceptanceLogo').files[0];
         if (!file) return alert('Ajoutez le logo qui doit figurer sur le billet.');
         try {
-            const company = availableCompanies.find(c => c.companyName === activeCompanyName) || null;
             const acceptedLogo = await readImage(file);
+            const acceptanceMessage = document.getElementById('acceptanceMessage').value.trim();
+            const channel = document.querySelector('input[name="acceptanceChannel"]:checked').value;
             await apiRequest('api.php?action=accept-reservation', { method: 'POST', body: JSON.stringify({
-                id: acceptanceReservationId, acceptanceLogo: acceptedLogo, message: document.getElementById('acceptanceMessage').value.trim()
+                id: acceptanceReservationId, acceptanceLogo: acceptedLogo, message: acceptanceMessage
             }) });
             closeAcceptance();
             await showBoatResList(activeCompanyName, activeBoatName);
-            const finalMessage = `${document.getElementById('acceptanceMessage').value.trim()}\nLogo entreprise: ${acceptedLogo}`;
-            if (company && company.logo) {
-                console.log('Logo de l’entreprise enregistré pour ce billet:', company.logo);
-            }
-            alert('Billet accepté et prêt à être envoyé.');
+            await sendTicket(acceptanceReservationId, channel);
         } catch (error) { alert(error.message); }
     }
 
