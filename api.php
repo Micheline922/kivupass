@@ -187,9 +187,7 @@ try {
                 }
                 $levelAvailable = true;
                 if ((int)($level['seats'] ?? 0) > 0) {
-                    $level['seats'] = (int)$level['seats'] - 1;
                     $levelFound = true;
-                    break 2;
                 }
             }
         }
@@ -202,8 +200,6 @@ try {
             jsonResponse(['error' => $error], 409);
         }
 
-        $updateFleet = $pdo->prepare('UPDATE companies SET fleet = ? WHERE id = ?');
-        $updateFleet->execute([json_encode($fleet, JSON_UNESCAPED_UNICODE), $company['id']]);
         $insert = $pdo->prepare('INSERT INTO reservations (client, email, whatsapp, telephone, compagnie, bateau, niveau, prix, reservation_date, reservation_time, statut, docs_soumis, pay_img) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $insert->execute([
             $body['client'], $body['email'], $body['whatsapp'] ?? '', $body['telephone'] ?? '', $body['compagnie'],
@@ -232,9 +228,62 @@ try {
         if ($logo === '' || $message === '') {
             jsonResponse(['error' => 'Le logo et le message d’acceptation sont obligatoires.'], 422);
         }
+
+        $pdo->beginTransaction();
+        $reservationId = (int)($body['id'] ?? 0);
+        $reservationStmt = $pdo->prepare('SELECT id, compagnie, bateau, niveau FROM reservations WHERE id = ? AND compagnie = ? AND bateau = ? AND statut = ? LIMIT 1 FOR UPDATE');
+        $reservationStmt->execute([$reservationId, $armateur['companyName'], $armateur['boatName'], 'En attente de validation']);
+        $reservation = $reservationStmt->fetch();
+        if (!$reservation) {
+            $pdo->rollBack();
+            jsonResponse(['error' => 'Réservation introuvable ou déjà traitée.'], 404);
+        }
+
+        $companyStmt = $pdo->prepare('SELECT fleet FROM companies WHERE company_name = ? FOR UPDATE');
+        $companyStmt->execute([$armateur['companyName']]);
+        $company = $companyStmt->fetch();
+        if (!$company) {
+            $pdo->rollBack();
+            jsonResponse(['error' => 'Compagnie introuvable.'], 404);
+        }
+
+        $fleet = json_decode((string)$company['fleet'], true) ?: [];
+        $seatReduced = false;
+        foreach ($fleet as &$boat) {
+            if (trim((string)($boat['name'] ?? '')) !== $armateur['boatName']) {
+                continue;
+            }
+            foreach ($boat['levels'] ?? [] as &$level) {
+                if (trim((string)($level['label'] ?? '')) !== trim((string)$reservation['niveau'])) {
+                    continue;
+                }
+                if ((int)($level['seats'] ?? 0) <= 0) {
+                    $pdo->rollBack();
+                    jsonResponse(['error' => 'Aucune place restante dans cette classe pour le bateau sélectionné.'], 409);
+                }
+                $level['seats'] = (int)$level['seats'] - 1;
+                $seatReduced = true;
+                break 2;
+            }
+        }
+        unset($boat, $level);
+
+        if (!$seatReduced) {
+            $pdo->rollBack();
+            jsonResponse(['error' => 'Classe ou bateau non trouvé pour la réduction des places.'], 404);
+        }
+
         $ticketCode = 'KVP-' . strtoupper(bin2hex(random_bytes(4)));
+        $updateCompany = $pdo->prepare('UPDATE companies SET fleet = ? WHERE company_name = ?');
+        $updateCompany->execute([json_encode($fleet, JSON_UNESCAPED_UNICODE), $armateur['companyName']]);
+
         $stmt = $pdo->prepare('UPDATE reservations SET statut = ?, acceptance_logo = ?, acceptance_message = ?, ticket_code = ?, rejection_reason = NULL, accepted_at = NOW() WHERE id = ? AND compagnie = ? AND bateau = ? AND statut = ?');
-        $stmt->execute(['Validé', $logo, $message, $ticketCode, (int)($body['id'] ?? 0), $armateur['companyName'], $armateur['boatName'], 'En attente de validation']);
+        $stmt->execute(['Validé', $logo, $message, $ticketCode, $reservationId, $armateur['companyName'], $armateur['boatName'], 'En attente de validation']);
+        if ($stmt->rowCount() !== 1) {
+            $pdo->rollBack();
+            jsonResponse(['error' => 'La réservation a déjà été traitée.'], 409);
+        }
+        $pdo->commit();
         jsonResponse(['success' => $stmt->rowCount() > 0, 'ticketCode' => $ticketCode, 'message' => $message]);
     }
 

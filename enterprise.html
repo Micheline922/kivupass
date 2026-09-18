@@ -619,6 +619,9 @@
                 <input type="text" class="boat-name" placeholder="Nom du bateau" style="margin:15px 0">
                 <label>Mot de passe privé du bateau</label>
                 <input type="password" class="boat-password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum">
+
+                <label>Photos de publicité du bateau</label>
+                <input type="file" class="boat-gallery" accept="image/*" multiple>
                 
                 <label>Horaires Hebdomadaires (Matin / Après-midi)</label>
                 <div class="schedule-container">
@@ -669,7 +672,7 @@
         if(!companyName) return alert("Nom de compagnie requis.");
 
         let fleet = [];
-        document.querySelectorAll('.boat-config').forEach(bDiv => {
+        for (const bDiv of document.querySelectorAll('.boat-config')) {
             let sched = {};
             bDiv.querySelectorAll('.day-row').forEach(row => {
                 sched[row.dataset.day] = {
@@ -685,13 +688,25 @@
                     seats: lBox.querySelector('.l-seats').value 
                 });
             });
+
+            const galleryFiles = bDiv.querySelector('.boat-gallery')?.files || [];
+            const boatPhotos = [];
+            for (const file of Array.from(galleryFiles)) {
+                try {
+                    boatPhotos.push(await readImage(file));
+                } catch (error) {
+                    console.warn('Impossible de lire une photo du bateau:', error);
+                }
+            }
+
             fleet.push({
                 name: bDiv.querySelector('.boat-name').value,
                 password: bDiv.querySelector('.boat-password').value,
                 schedule: sched,
-                levels: levels
+                levels: levels,
+                photos: boatPhotos
             });
-        });
+        }
 
         const fullData = {
             id: Date.now(),
@@ -1021,11 +1036,17 @@
         const file = document.getElementById('acceptanceLogo').files[0];
         if (!file) return alert('Ajoutez le logo qui doit figurer sur le billet.');
         try {
+            const company = availableCompanies.find(c => c.companyName === activeCompanyName) || null;
+            const acceptedLogo = await readImage(file);
             await apiRequest('api.php?action=accept-reservation', { method: 'POST', body: JSON.stringify({
-                id: acceptanceReservationId, acceptanceLogo: await readImage(file), message: document.getElementById('acceptanceMessage').value.trim()
+                id: acceptanceReservationId, acceptanceLogo: acceptedLogo, message: document.getElementById('acceptanceMessage').value.trim()
             }) });
             closeAcceptance();
             await showBoatResList(activeCompanyName, activeBoatName);
+            const finalMessage = `${document.getElementById('acceptanceMessage').value.trim()}\nLogo entreprise: ${acceptedLogo}`;
+            if (company && company.logo) {
+                console.log('Logo de l’entreprise enregistré pour ce billet:', company.logo);
+            }
             alert('Billet accepté et prêt à être envoyé.');
         } catch (error) { alert(error.message); }
     }
@@ -1039,12 +1060,15 @@
     async function sendTicket(id, canal) {
         const reservations = await apiRequest('api.php?action=reservations');
         const r = reservations.find(x => x.id == id);
+        const company = availableCompanies.find(c => c.companyName === activeCompanyName) || null;
+        const companyLogo = r.acceptanceLogo || (company && company.logo ? company.logo : '');
         const msg = r.acceptanceMessage || `Bonjour ${r.client}, votre réservation KivuPass pour ${r.bateau} est : ${r.statut.toUpperCase()}. Présentez ce message à l’embarquement.`;
+        const fullMessage = `${msg}${companyLogo ? `\nLogo entreprise: ${companyLogo}` : ''}\nContact: ${r.whatsapp || r.telephone || 'N/A'}\nEmail: ${r.email}`;
         const phone = (r.whatsapp || r.telephone || "243000000000").replace(/\D/g, '');
 
-        if(canal === 'wa') window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-        else if(canal === 'sms') window.location.href = `sms:${phone}?body=${encodeURIComponent(msg)}`;
-        else window.location.href = `mailto:${r.email}?subject=Ticket KivuPass&body=${encodeURIComponent(msg)}`;
+        if(canal === 'wa') window.open(`https://wa.me/${phone}?text=${encodeURIComponent(fullMessage)}`, '_blank');
+        else if(canal === 'sms') window.location.href = `sms:${phone}?body=${encodeURIComponent(fullMessage)}`;
+        else window.location.href = `mailto:${r.email}?subject=${encodeURIComponent('Ticket KivuPass')}&body=${encodeURIComponent(fullMessage)}`;
     }
 
     // --- ZOOM LOGIC ---
