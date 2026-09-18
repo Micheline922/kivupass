@@ -85,6 +85,7 @@ try {
         if (trim((string)($body['companyName'] ?? '')) === '') {
             jsonResponse(['error' => 'Le nom de la compagnie est requis.'], 422);
         }
+        validatePaymentNumbers($body['payments'] ?? []);
         $fleet = array_values($body['fleet'] ?? []);
         foreach ($fleet as &$boat) {
             if (trim((string)($boat['name'] ?? '')) === '' || strlen((string)($boat['password'] ?? '')) < 8) {
@@ -118,10 +119,27 @@ try {
         if ($companyName === '') {
             jsonResponse(['error' => 'Le nom de la compagnie est requis.'], 422);
         }
+        validatePaymentNumbers($body['payments'] ?? []);
+
+        $existingStmt = $pdo->prepare('SELECT fleet FROM companies WHERE company_name = ? LIMIT 1');
+        $existingStmt->execute([$companyName]);
+        $existingFleet = json_decode((string)$existingStmt->fetchColumn(), true) ?: [];
+        $existingHashes = [];
+        foreach ($existingFleet as $existingBoat) {
+            if (!empty($existingBoat['name']) && !empty($existingBoat['passwordHash'])) {
+                $existingHashes[trim((string)$existingBoat['name'])] = $existingBoat['passwordHash'];
+            }
+        }
 
         $fleet = array_values($body['fleet'] ?? []);
         foreach ($fleet as &$boat) {
-            if (trim((string)($boat['name'] ?? '')) === '' || strlen((string)($boat['password'] ?? '')) < 8) {
+            $boatName = trim((string)($boat['name'] ?? ''));
+            $plainPassword = (string)($boat['password'] ?? '');
+            $passwordHash = (string)($boat['passwordHash'] ?? ($existingHashes[$boatName] ?? ''));
+            if ($boatName === '' || ($plainPassword === '' && $passwordHash === '')) {
+                jsonResponse(['error' => 'Chaque bateau doit avoir un mot de passe d’au moins 8 caractères.'], 422);
+            }
+            if ($plainPassword !== '' && strlen($plainPassword) < 8) {
                 jsonResponse(['error' => 'Chaque bateau doit avoir un mot de passe d’au moins 8 caractères.'], 422);
             }
             if (empty($boat['levels']) || !is_array($boat['levels'])) {
@@ -132,7 +150,7 @@ try {
                     jsonResponse(['error' => 'Chaque classe doit avoir un nom, un prix et au moins une place.'], 422);
                 }
             }
-            $boat['passwordHash'] = password_hash((string)$boat['password'], PASSWORD_DEFAULT);
+            $boat['passwordHash'] = $plainPassword !== '' ? password_hash($plainPassword, PASSWORD_DEFAULT) : $passwordHash;
             unset($boat['password']);
         }
         unset($boat);
@@ -324,6 +342,16 @@ function companyFromRow(array $row): array
         'logo' => $row['logo'] ?? null,
         'approved' => (bool)$row['approved'],
     ];
+}
+
+function validatePaymentNumbers(array $payments): void
+{
+    foreach ($payments as $provider => $number) {
+        $number = trim((string)$number);
+        if ($number !== '' && !preg_match('/^\d+$/', $number)) {
+            jsonResponse(['error' => 'Le numéro Mobile Money "' . $provider . '" doit contenir uniquement des chiffres.'], 422);
+        }
+    }
 }
 
 function publicFleet(array $fleet): array

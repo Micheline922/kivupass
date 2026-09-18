@@ -314,6 +314,11 @@
         .st-reject { background: #4d0a0a; color: #ff4d4d; border: 1px solid #ff4d4d; }
 
         .hidden { display: none !important; }
+        .password-field { display: flex; align-items: center; position: relative; }
+        .password-field input { flex: 1; padding-right: 48px; }
+        .password-toggle { width: 42px; height: 42px; border: 0; background: transparent; color: var(--text-gray); cursor: pointer; margin-left: -46px; z-index: 1; }
+        .reservation-status-list { display: grid; gap: 6px; margin-top: 10px; max-height: 150px; overflow-y: auto; color: var(--text-gray); font-size: 12px; text-align: left; }
+        .reservation-status-item { padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; }
 
         @media (max-width: 760px) {
             .container { width: 100%; margin: 20px auto; }
@@ -398,22 +403,22 @@
                 <div class="pay-item">
                     <label>Orange Money</label>
                     <i class="fas fa-mobile-alt" style="color: var(--orange);"></i>
-                    <input type="text" id="payOrange" placeholder="Numéro de réception">
+                    <input type="tel" id="payOrange" inputmode="numeric" pattern="[0-9]+" placeholder="Numéro de réception">
                 </div>
                 <div class="pay-item">
                     <label>Airtel Money</label>
                     <i class="fas fa-mobile-alt" style="color: var(--airtel);"></i>
-                    <input type="text" id="payAirtel" placeholder="Numéro de réception">
+                    <input type="tel" id="payAirtel" inputmode="numeric" pattern="[0-9]+" placeholder="Numéro de réception">
                 </div>
                 <div class="pay-item">
                     <label>Vodacom (M-Pesa)</label>
                     <i class="fas fa-mobile-alt" style="color: var(--mpesa);"></i>
-                    <input type="text" id="payVodacom" placeholder="Numéro de réception">
+                    <input type="tel" id="payVodacom" inputmode="numeric" pattern="[0-9]+" placeholder="Numéro de réception">
                 </div>
                 <div class="pay-item">
                     <label>Africell</label>
                     <i class="fas fa-mobile-alt" style="color: var(--accent);"></i>
-                    <input type="text" id="payAfricell" placeholder="Numéro de réception">
+                    <input type="tel" id="payAfricell" inputmode="numeric" pattern="[0-9]+" placeholder="Numéro de réception">
                 </div>
             </div>
 
@@ -457,7 +462,7 @@
                 </div>
                 <div class="form-group">
                     <label for="boatPassword">Mot de passe du bateau :</label>
-                    <input id="boatPassword" type="password" autocomplete="current-password" placeholder="Mot de passe">
+                    <div class="password-field"><input id="boatPassword" type="password" autocomplete="current-password" placeholder="Mot de passe"><button type="button" class="password-toggle" onclick="togglePassword('boatPassword', this)" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button></div>
                 </div>
                 <button class="btn-sm" style="background: var(--success); color: white;" onclick="loginBoat()"><i class="fas fa-lock-open"></i> Ouvrir</button>
                 <button class="btn-sm" style="background: var(--accent); color: white;" onclick="addBoatToCompany()"><i class="fas fa-plus"></i> Ajouter un bateau</button>
@@ -487,8 +492,8 @@
                     </select>
                 </div>
                 <div class="dashboard-metrics" style="grid-template-columns:repeat(2,minmax(0,1fr));">
-                    <div class="metric-card metric-valid"><span>Réservations acceptées</span><strong id="acceptedListCount">0</strong><small id="acceptedList" style="display:block;color:var(--text-gray);margin-top:10px;"></small></div>
-                    <div class="metric-card metric-reject"><span>Réservations refusées</span><strong id="rejectedListCount">0</strong><small id="rejectedList" style="display:block;color:var(--text-gray);margin-top:10px;"></small></div>
+                    <div class="metric-card metric-valid"><span>Réservations acceptées</span><strong id="acceptedListCount">0</strong><div id="acceptedList" class="reservation-status-list"></div></div>
+                    <div class="metric-card metric-reject"><span>Réservations refusées</span><strong id="rejectedListCount">0</strong><div id="rejectedList" class="reservation-status-list"></div></div>
                 </div>
                 
                 <div class="res-table-wrap">
@@ -521,7 +526,7 @@
             <hr style="border: 0.5px solid #333; margin: 20px 0;">
             <div id="superAdminLogin">
                 <p class="dashboard-message">Accès réservé à l’Administrateur.</p>
-                <input id="superAdminPassword" type="password" autocomplete="current-password" placeholder="Mot de passe super-admin">
+                <div class="password-field"><input id="superAdminPassword" type="password" autocomplete="current-password" placeholder="Mot de passe super-admin"><button type="button" class="password-toggle" onclick="togglePassword('superAdminPassword', this)" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button></div>
                 <button class="btn-sm btn-valid" style="margin-top:12px;" onclick="loginSuperAdmin()"><i class="fas fa-key"></i> Se connecter</button>
             </div>
             <div id="superAdminContent" class="hidden">
@@ -595,6 +600,13 @@
         }[character]));
     }
 
+        function togglePassword(inputOrId, button) {
+            const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+            input.type = input.type === 'password' ? 'text' : 'password';
+            button.innerHTML = `<i class="fas fa-${input.type === 'password' ? 'eye' : 'eye-slash'}"></i>`;
+            button.setAttribute('aria-label', input.type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+        }
+
     // --- NAVIGATION ---
     function switchTab(id) {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -629,7 +641,7 @@
                 <h3><i class="fas fa-ship"></i> Configuration Bateau #${i}</h3>
                 <input type="text" class="boat-name" placeholder="Nom du bateau" style="margin:15px 0">
                 <label>Mot de passe privé du bateau</label>
-                <input type="password" class="boat-password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum">
+                <div class="password-field"><input type="password" class="boat-password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum"><button type="button" class="password-toggle" onclick="togglePassword(this.previousElementSibling, this)" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button></div>
 
                 <label>Photos de publicité du bateau</label>
                 <input type="file" class="boat-gallery" accept="image/*" multiple>
@@ -681,6 +693,10 @@
     async function saveAllToStorage() {
         const companyName = document.getElementById('compName').value.trim();
         if(!companyName) return alert("Nom de compagnie requis.");
+        const paymentInputs = ['payOrange', 'payAirtel', 'payVodacom', 'payAfricell'];
+        if (paymentInputs.some(id => document.getElementById(id).value.trim() && !/^\d+$/.test(document.getElementById(id).value.trim()))) {
+            return alert('Les numéros Mobile Money doivent contenir uniquement des chiffres.');
+        }
 
         let fleet = [];
         for (const bDiv of document.querySelectorAll('.boat-config')) {
@@ -947,8 +963,12 @@
         const rejected = dashboardReservations.filter(r => r.statut === 'Rejeté');
         document.getElementById('acceptedListCount').textContent = accepted.length;
         document.getElementById('rejectedListCount').textContent = rejected.length;
-        document.getElementById('acceptedList').textContent = accepted.map(r => `${r.client} (${r.ticketCode || 'sans référence'})`).join(' · ') || 'Aucune réservation acceptée';
-        document.getElementById('rejectedList').textContent = rejected.map(r => r.client).join(' · ') || 'Aucune réservation refusée';
+        document.getElementById('acceptedList').innerHTML = accepted.length
+            ? accepted.map(r => `<div class="reservation-status-item"><strong>${escapeHtml(r.client)}</strong><br><span>${escapeHtml(r.bateau)} · ${escapeHtml(r.niveau)} · ${escapeHtml(r.ticketCode || 'sans référence')}</span></div>`).join('')
+            : '<div class="reservation-status-item">Aucune réservation acceptée</div>';
+        document.getElementById('rejectedList').innerHTML = rejected.length
+            ? rejected.map(r => `<div class="reservation-status-item"><strong>${escapeHtml(r.client)}</strong><br><span>${escapeHtml(r.bateau)} · ${escapeHtml(r.niveau)}</span></div>`).join('')
+            : '<div class="reservation-status-item">Aucune réservation refusée</div>';
         const body = document.getElementById('resTableBody');
         if (!filtered.length) {
             body.innerHTML = '<tr><td colspan="6"><div class="dashboard-message">Aucune réservation pour ce filtre.</div></td></tr>';
@@ -1121,9 +1141,21 @@
         const body = document.getElementById('superAdminBody');
         body.innerHTML = '';
         data.forEach((c, index) => {
+            const paymentDetails = Object.entries(c.payments || {})
+                .filter(([, number]) => number)
+                .map(([provider, number]) => `${escapeHtml(provider)}: ${escapeHtml(number)}`).join(' · ') || 'Aucun numéro fourni';
+            const fleetDetails = (c.fleet || []).map(boat => {
+                const levels = (boat.levels || []).map(level => `${escapeHtml(level.label)} (${escapeHtml(level.price)} $, ${escapeHtml(level.seats)} places)`).join(', ');
+                const schedules = Object.entries(boat.schedule || {}).filter(([, schedule]) => schedule && (schedule.morning?.dep || schedule.afternoon?.dep)).map(([day, schedule]) => `${escapeHtml(day)}: ${escapeHtml(schedule.morning?.dep || '-')} / ${escapeHtml(schedule.afternoon?.dep || '-')}`).join(', ');
+                return `<li><strong>${escapeHtml(boat.name)}</strong> : ${levels || 'Aucune classe'}${schedules ? `<br><span>Horaires: ${schedules}</span>` : ''}</li>`;
+            }).join('');
             body.innerHTML += `
                 <div class="glass-card" style="margin-bottom:20px; padding:20px; border-left: 8px solid ${c.approved?'#35e548':'#1677ff'}">
                     <h3 style="margin:0">${c.companyName} <span style="font-size:12px; color:var(--text-gray);">(${c.fleet.length} bateaux)</span></h3>
+                    <p style="color:var(--text-gray); margin:10px 0 4px;"><strong>Numéros Mobile Money :</strong> ${paymentDetails}</p>
+                    <p style="color:var(--text-gray); margin:4px 0;"><strong>Documents requis :</strong> ${escapeHtml((c.requiredDocs || []).join(', ') || 'Aucun')}</p>
+                    <p style="color:var(--text-gray); margin:4px 0;"><strong>Flotte et capacités :</strong></p>
+                    <ul style="color:var(--text-gray); margin:4px 0 14px; padding-left:20px;">${fleetDetails || '<li>Aucun bateau fourni</li>'}</ul>
                     <div style="margin-top:10px">
                         ${!c.approved ? `<button class="btn-sm btn-valid" onclick="superApprove(${c.id})">AUTORISER PUBLICATION</button>` : '<span style="color:#35e548; font-weight:bold;">PUBLIÉ SUR L\'INDEX</span>'}
                         <button class="btn-sm btn-reject" onclick="superDelete(${c.id})">SUPPRIMER COMPAGNIE</button>
