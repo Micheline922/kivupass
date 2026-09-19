@@ -242,6 +242,11 @@
         .reservation-detail { display: grid; gap: 4px; min-width: 150px; }
         .reservation-detail strong { color: #fff; }
         .reservation-detail small { color: var(--text-gray); }
+        .reservation-contact { display: grid; gap: 5px; margin-top: 4px; }
+        .contact-copy { display: flex; align-items: center; gap: 6px; color: var(--text-gray); font-size: 12px; }
+        .contact-copy span { max-width: 180px; overflow-wrap: anywhere; }
+        .copy-contact-btn { border: 1px solid var(--border); background: transparent; color: var(--text-gray); border-radius: 5px; padding: 3px 6px; cursor: pointer; }
+        .copy-contact-btn:hover { border-color: var(--accent); color: var(--accent); }
         .reservation-date { color: var(--gold); font-size: 12px; }
 
         /* 
@@ -304,6 +309,8 @@
         .btn-reject { background: var(--danger); color: white; }
         
         .notif-bar { display: flex; gap: 8px; margin-top: 10px; }
+        .notif-bar .btn-sm { min-width: 42px; }
+        .notif-label { display: block; margin-top: 6px; color: var(--text-gray); font-size: 11px; }
         .btn-wa { background: #25D366; color: white; }
         .btn-sms { background: #0084FF; color: white; }
         .btn-mail { background: #EA4335; color: white; }
@@ -990,7 +997,11 @@
 
             return `<tr>
                 <td data-label="Documents">${imgsHtml}</td>
-                <td data-label="Passager"><div class="reservation-detail"><strong>${escapeHtml(r.client)}</strong><small>${escapeHtml(r.email)}</small><small>${escapeHtml(r.whatsapp || r.telephone || 'N/A')}</small></div></td>
+                <td data-label="Passager"><div class="reservation-detail"><strong>${escapeHtml(r.client)}</strong><div class="reservation-contact">
+                    <div class="contact-copy"><i class="fas fa-envelope"></i><span>${escapeHtml(r.email || 'Email non fourni')}</span><button type="button" class="copy-contact-btn" onclick="copyReservationContact(this)" data-contact="${escapeHtml(r.email || '')}" title="Copier l’e-mail"><i class="fas fa-copy"></i></button></div>
+                    <div class="contact-copy"><i class="fab fa-whatsapp" style="color:#25D366;"></i><span>${escapeHtml(r.whatsapp || 'WhatsApp non fourni')}</span><button type="button" class="copy-contact-btn" onclick="copyReservationContact(this)" data-contact="${escapeHtml(r.whatsapp || '')}" title="Copier le numéro WhatsApp"><i class="fas fa-copy"></i></button></div>
+                    ${r.telephone ? `<div class="contact-copy"><i class="fas fa-phone"></i><span>${escapeHtml(r.telephone)}</span><button type="button" class="copy-contact-btn" onclick="copyReservationContact(this)" data-contact="${escapeHtml(r.telephone)}" title="Copier le téléphone"><i class="fas fa-copy"></i></button></div>` : ''}
+                </div></div></td>
                 <td data-label="Voyage"><div class="reservation-detail"><strong>${escapeHtml(r.niveau)} · ${escapeHtml(r.prix)}$</strong><small>${escapeHtml(r.bateau)}</small><small class="reservation-date">${escapeHtml(r.date || '')} à ${escapeHtml(r.heure || '')}</small></div></td>
                 <td data-label="Statut"><span class="status-badge ${stClass}">${escapeHtml(st)}</span></td>
                 <td data-label="Validation">
@@ -1001,10 +1012,11 @@
                 </td>
                 <td data-label="Envoyer">
                     <div class="notif-bar">
-                        <button class="btn-sm btn-wa" onclick="sendTicket(${r.id}, 'wa')"><i class="fab fa-whatsapp"></i></button>
-                        <button class="btn-sm btn-sms" onclick="sendTicket(${r.id}, 'sms')"><i class="fas fa-sms"></i></button>
-                        <button class="btn-sm btn-mail" onclick="sendTicket(${r.id}, 'mail')"><i class="fas fa-envelope"></i></button>
+                        <button class="btn-sm btn-wa" onclick="sendTicket(${r.id}, 'wa')" title="Envoyer le billet par WhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        <button class="btn-sm btn-sms" onclick="sendTicket(${r.id}, 'sms')" title="Envoyer le billet par SMS"><i class="fas fa-sms"></i></button>
+                        <button class="btn-sm btn-mail" onclick="sendTicket(${r.id}, 'mail')" title="Envoyer le billet par e-mail"><i class="fas fa-envelope"></i></button>
                     </div>
+                    <small class="notif-label">Envoyer le billet</small>
                 </td>
             </tr>`;
         }).join('');
@@ -1039,6 +1051,19 @@
     }
 
     function closeAcceptance() { document.getElementById('acceptanceModal').style.display = 'none'; }
+
+    async function copyReservationContact(button) {
+        const value = button.dataset.contact || '';
+        if (!value) return alert('Cette coordonnée n’a pas été fournie par le client.');
+        try {
+            await navigator.clipboard.writeText(value);
+            const original = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => { button.innerHTML = original; }, 1200);
+        } catch (error) {
+            alert('La copie automatique est indisponible dans ce navigateur.');
+        }
+    }
 
     function readImage(file) {
         if (!file.type.startsWith('image/') || file.size <= 1400000) {

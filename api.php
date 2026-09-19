@@ -167,7 +167,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'reservations') {
-        $required = ['client', 'email', 'compagnie', 'bateau', 'niveau', 'prix'];
+        $required = ['client', 'email', 'whatsapp', 'compagnie', 'bateau', 'niveau', 'prix'];
         foreach ($required as $field) {
             if (!isset($body[$field]) || trim((string)$body[$field]) === '') {
                 jsonResponse(['error' => 'Champ requis manquant: ' . $field], 422);
@@ -267,6 +267,7 @@ try {
 
         $fleet = json_decode((string)$company['fleet'], true) ?: [];
         $seatReduced = false;
+        $availableSeats = null;
         foreach ($fleet as &$boat) {
             if (trim((string)($boat['name'] ?? '')) !== $armateur['boatName']) {
                 continue;
@@ -280,6 +281,7 @@ try {
                     jsonResponse(['error' => 'Aucune place restante dans cette classe pour le bateau sélectionné.'], 409);
                 }
                 $level['seats'] = (int)$level['seats'] - 1;
+                $availableSeats = $level['seats'];
                 $seatReduced = true;
                 break 2;
             }
@@ -302,7 +304,12 @@ try {
             jsonResponse(['error' => 'La réservation a déjà été traitée.'], 409);
         }
         $pdo->commit();
-        jsonResponse(['success' => $stmt->rowCount() > 0, 'ticketCode' => $ticketCode, 'message' => $message]);
+        jsonResponse([
+            'success' => true,
+            'ticketCode' => $ticketCode,
+            'message' => $message,
+            'availableSeats' => $availableSeats,
+        ]);
     }
 
     if ($method === 'PATCH' && $action === 'reservation-checkin') {
