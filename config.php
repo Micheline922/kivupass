@@ -6,7 +6,7 @@ define('DB_PORT', (int)(getenv('MYSQL_ADDON_PORT') ?: (getenv('DB_PORT') ?: 3306
 define('DB_NAME', getenv('MYSQL_ADDON_DB') ?: (getenv('DB_NAME') ?: 'boyq44fnxfe8elvqtivg'));
 define('DB_USER', getenv('MYSQL_ADDON_USER') ?: (getenv('DB_USER') ?: 'uxhd9vzgcujluir2'));
 define('DB_PASS', getenv('MYSQL_ADDON_PASSWORD') ?: (getenv('DB_PASS') ?: (getenv('DB_PASSWORD') ?: 'STBVNBSvvCXg5pgd6ags')));
-const SUPER_ADMIN_PASSWORD_HASH = '$2y$10$BB3YCCj7kXsC0PhEzfJ/JOQ94Yiz07Qaw0uS23hSCA06.sBth58ey';
+const SUPER_ADMIN_PASSWORD_HASH = '$2b$10$2ppi7Z7VdXEQU2l1Q8J2DOG0kVdT2CaGwo8PMq7eswZ6rtamYXSQ2';
 
 function startAppSession(): void
 {
