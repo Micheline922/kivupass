@@ -838,7 +838,7 @@
                             <span class="level-tag">${level.label}</span>
                             <span class="price">${level.price} $</span>
                             <span class="seats-count ${isCritical ? 'seats-critical' : ''}">
-                                ${level.seats > 0 ? level.seats + ' places restantes' : 'BATEAU COMPLET'}
+                                ${level.seats > 0 ? level.seats + ' places restantes' : 'Places non disponibles'}
                             </span>
                         </div>`;
                 }).join('');
@@ -851,7 +851,7 @@
                         <h3>${boat.name}</h3>
                         <div class="levels-container">${pricingTableHtml}</div>
                         <button class="btn-reserve" onclick="triggerBookingProcess(${index})" ${hasAvailableLevel ? '' : 'disabled'}>
-                            ${hasAvailableLevel ? 'Réserver sur ce bateau' : 'Bateau complet'}
+                            ${hasAvailableLevel ? 'Réserver sur ce bateau' : 'Places non disponibles'}
                         </button>
                     </div>`;
                 gridContainer.appendChild(boatCard);
@@ -911,14 +911,14 @@
             // Construction des options de classes
             const availableLevels = activeBoat.levels.filter(level => parseInt(level.seats, 10) > 0);
             if (!availableLevels.length) {
-                alert('Ce bateau est complet pour toutes les classes disponibles.');
+                alert('Places non disponibles pour toutes les classes de ce bateau.');
                 return;
             }
             dropdownSelect.innerHTML = activeBoat.levels.map((level, idx) => {
                 const isFull = parseInt(level.seats) <= 0;
                 return `
                     <option value="${idx}" ${isFull ? 'disabled' : ''}>
-                        ${level.label} - Tarif : ${level.price}$ (${isFull ? 'COMPLET' : level.seats + ' places'})
+                        ${level.label} - Tarif : ${level.price}$ (${isFull ? 'Places non disponibles' : level.seats + ' places'})
                     </option>`;
             }).join('');
 

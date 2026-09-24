@@ -278,7 +278,7 @@ try {
                 }
                 if ((int)($level['seats'] ?? 0) <= 0) {
                     $pdo->rollBack();
-                    jsonResponse(['error' => 'Aucune place restante dans cette classe pour le bateau sélectionné.'], 409);
+                    jsonResponse(['error' => 'Places non disponibles dans cette classe pour le bateau sélectionné.'], 409);
                 }
                 $level['seats'] = (int)$level['seats'] - 1;
                 $availableSeats = $level['seats'];
