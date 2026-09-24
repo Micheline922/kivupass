@@ -850,8 +850,8 @@
                     <div class="boat-info">
                         <h3>${boat.name}</h3>
                         <div class="levels-container">${pricingTableHtml}</div>
-                        <button class="btn-reserve" onclick="triggerBookingProcess(${index})" ${hasAvailableLevel ? '' : 'disabled'}>
-                            ${hasAvailableLevel ? 'Réserver sur ce bateau' : 'Places non disponibles'}
+                        <button class="btn-reserve" onclick="triggerBookingProcess(${index})">
+                            ${hasAvailableLevel ? 'Réserver sur ce bateau' : 'Classe pleine'}
                         </button>
                     </div>`;
                 gridContainer.appendChild(boatCard);
@@ -911,7 +911,7 @@
             // Construction des options de classes
             const availableLevels = activeBoat.levels.filter(level => parseInt(level.seats, 10) > 0);
             if (!availableLevels.length) {
-                alert('Places non disponibles pour toutes les classes de ce bateau.');
+                alert('Classe pleine');
                 return;
             }
             dropdownSelect.innerHTML = activeBoat.levels.map((level, idx) => {
