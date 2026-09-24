@@ -1,5 +1,5 @@
 
--- Utilisateur central de la plateforme (MCD : ADMINISTRATEUR).
+
 CREATE TABLE IF NOT EXISTS administrators (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     full_name VARCHAR(180) NOT NULL,
@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS administrators (
     UNIQUE KEY uq_administrators_email (email)
 ) ENGINE=InnoDB;
 
--- Table historique conservee pour la compatibilite avec api.php.
 CREATE TABLE IF NOT EXISTS companies (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     administrator_id BIGINT UNSIGNED NULL,
