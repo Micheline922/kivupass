@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('DB_HOST', getenv('MYSQL_ADDON_HOST') ?: (getenv('DB_HOST') ?: 'boyq44fnxfe8elvqtivg-mysql.services.clever-cloud.com'));
+define('DB_HOST', getenv('MYSQL_ADDON_HOST') ?: (getenv('DB_HOST') ?: 'boyq44fnxfe8e1vqtivg-mysql.services.clever-cloud.com'));
 define('DB_PORT', (int)(getenv('MYSQL_ADDON_PORT') ?: (getenv('DB_PORT') ?: 3306)));
 define('DB_NAME', getenv('MYSQL_ADDON_DB') ?: (getenv('DB_NAME') ?: 'boyq44fnxfe8elvqtivg'));
 define('DB_USER', getenv('MYSQL_ADDON_USER') ?: (getenv('DB_USER') ?: 'uxhd9vzgcujluir2'));
